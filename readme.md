@@ -59,6 +59,8 @@ flowchart LR
 ## Current Status
 - This repository currently contains the eye-tracking proof of concept only.
 - Implemented in [eye_tracker.py](eye_tracker.py) using MediaPipe Tasks Face Landmarker.
+- 5-point gaze calibration with a progress ring and affine mapping to screen space.
+- Live gaze point visualization and recalibration hotkey.
 - UI, NLP, and backend services are planned but not yet in this repo.
 
 ## Roadmap
@@ -103,7 +105,16 @@ Press `q` to exit the camera window.
 ## 🖱️ Usage
 Ensure your room is well-lit and your face is clearly visible to the webcam.
 
-Keep your head relatively still. Look at a specific point on the screen to see iris landmarks drawn in real time.
+Follow the yellow calibration dot through the five points. A progress ring fills as you hold your gaze.
+
+After calibration, a cyan dot shows the mapped gaze position.
+
+Hotkeys: press `r` to recalibrate, `q` to quit.
+
+## Troubleshooting
+- **No camera window:** Close other apps using the webcam and try again.
+- **Poor tracking:** Increase lighting and avoid backlight; keep face centered.
+- **Laggy video:** Reduce background apps or lower your camera resolution if possible.
 
 ## 📜 License
 This project is free and open-source software distributed under the GNU General Public License v3.0 (GPLv3). See the LICENSE file for more details.
