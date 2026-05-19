@@ -15,6 +15,7 @@ This project was developed as a final-year thesis/project (CSE 400) at the Depar
 - [Tech Stack](#tech-stack)
 - [System Architecture](#system-architecture)
 - [Current Status](#current-status)
+- [Roadmap](#roadmap)
 - [Getting Started](#getting-started)
 - [Usage](#usage)
 - [License](#license)
@@ -39,10 +40,33 @@ Assistive technology is often prohibitively expensive (costing upwards of $1,000
 * **Computer Vision:** OpenCV, Google MediaPipe (Face Landmarker / Iris Tracking)
 * **Machine Learning / NLP:** PyTorch, NLTK, Bangla2B Corpus
 
+## 🧩 System Architecture
+```mermaid
+flowchart LR
+	A[Webcam] --> B[CV Pipeline]
+	B --> C[Eye/Gaze Signal]
+	C --> D[Backend API]
+	D --> E[Web UI]
+	F[NLP Predictor] --> D
+
+	subgraph CV Pipeline
+	B1[Face Landmarker]
+	B2[Iris Landmarks]
+	B1 --> B2
+	end
+```
+
 ## Current Status
 - This repository currently contains the eye-tracking proof of concept only.
 - Implemented in [eye_tracker.py](eye_tracker.py) using MediaPipe Tasks Face Landmarker.
 - UI, NLP, and backend services are planned but not yet in this repo.
+
+## Roadmap
+- Stable gaze estimation and calibration flow
+- FastAPI WebSocket backend for real-time cursor updates
+- React-based Bengali keyboard with dwell-click UX
+- Bengali predictive text engine integration
+- End-to-end latency and accessibility testing
 
 ## 🚀 Getting Started
 
@@ -83,3 +107,6 @@ Keep your head relatively still. Look at a specific point on the screen to see i
 
 ## 📜 License
 This project is free and open-source software distributed under the GNU General Public License v3.0 (GPLv3). See the LICENSE file for more details.
+
+## 🙏 Acknowledgments
+- MediaPipe and OpenCV open-source communities
