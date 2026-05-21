@@ -38,6 +38,7 @@ Assistive technology is often prohibitively expensive (costing upwards of $1,000
 * **Predictive Bengali Text Engine:** Context-aware word prediction trained on a Bengali corpus to minimize keystrokes.
 * **Asynchronous Multi-Threaded streaming:** Decoupled network and hardware operations to enable sub-30ms real-time transmission.
 * **Hands-free Gaze Interaction:** Animated circular SVG dwell indicators with integrated sci-fi sound feedback and scrolling live event logs.
+* **Quartic Adaptive Gaze Stabilization:** A mathematical 4th-power adaptive Exponential Moving Average (EMA) filter that isolates physiological micro-saccades and tremors during target fixation while retaining instant saccadic sweep responsiveness.
 
 ---
 
@@ -70,7 +71,7 @@ flowchart TD
 
     subgraph Browser Client [viewer.html Dashboard]
         G -->|Low Latency Event Stream| H[Webpage Consumer WS]
-        H -->|Direct Element Translation| I[Native Bounding-Box Detector]
+        H -->|Quartic Adaptive EMA Filter| I[Native Bounding-Box Detector]
         I -->|1.0s Dwell Lock| J[Web Audio Confirmation Beeps]
         I -->|Trigger State Change| K[Cyber Dashboard & Actions Log]
     end
@@ -87,6 +88,7 @@ To deliver absolute real-time snappiness and eliminate communication lag, Drisht
 3. **Scaled Down Inference Frame Size:** Camera frames are scaled to `INFER_WIDTH = 320` for MediaPipe. Processing 4x fewer pixels speeds up face landmarking by 3-4x (slashing inference latency to **~12ms** per frame) while retaining full iris detail.
 4. **Transition-Free Visual Snap:** Removed CSS transitions from the browser cursor `#dot` (`transition: none`). The dot snaps instantaneously to raw gaze coordinates as they arrive, matching native OS mouse behavior.
 5. **waitKey Delay Minimization:** OpenCV keyboard polling was optimized from `cv2.waitKey(5)` to `cv2.waitKey(1)` to save 4ms of blocking time per frame.
+6. **Quartic Adaptive Dead-Zone Filtering:** Combats natural high-frequency physiological eye-jitter (tremors) by applying a $4^{\text{th}}\text{-power}$ adaptive Exponential Moving Average (EMA) algorithm on the coordinate data. It locks the gaze cursor steady during static fixation ($\alpha_{\text{min}} = 0.015, d_{\text{thresh}} = 0.12$) and transitions to near-raw coordinates ($\alpha_{\text{max}} = 0.95$) during saccades for lag-free cursor tracking.
 
 ---
 
