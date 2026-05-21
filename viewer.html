@@ -15,6 +15,9 @@
         --accent-cyan: #00ffd5;
         --accent-yellow: #f59e0b;
         --accent-red: #ef4444;
+        --accent-purple: #a855f7;
+        --accent-pink: #ec4899;
+        --accent-green: #10b981;
         --border-color: rgba(31, 41, 55, 0.6);
         --text-main: #f3f4f6;
         --text-sub: #9ca3af;
@@ -145,35 +148,305 @@
         pointer-events: none;
       }
 
+      /* Tab System Navigation */
+      .tab-navigation {
+        position: absolute;
+        top: 15px;
+        left: 24px;
+        right: 24px;
+        display: flex;
+        gap: 15px;
+        z-index: 15;
+      }
+
+      .tab-btn {
+        flex: 1;
+        background: rgba(15, 23, 42, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 14px;
+        padding: 14px 24px;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text-sub);
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        user-select: none;
+      }
+
+      .tab-btn.gaze-hover {
+        border-color: var(--accent-cyan);
+        background: rgba(0, 255, 213, 0.08);
+        color: #ffffff;
+        box-shadow: 0 0 15px rgba(0, 255, 213, 0.15);
+      }
+
+      .tab-btn.active-tab {
+        border-color: var(--accent-cyan);
+        background: rgba(0, 255, 213, 0.12);
+        color: var(--accent-cyan);
+        box-shadow: 0 0 20px rgba(0, 255, 213, 0.25), inset 0 0 8px rgba(0, 255, 213, 0.1);
+      }
+
+      /* Sliding Glassmorphism Panels */
+      .panel-content {
+        position: absolute;
+        top: 80px;
+        left: 2.5%;
+        width: 95%;
+        height: calc(100% - 96px);
+        display: flex;
+        flex-direction: column;
+        opacity: 0;
+        transform: translateY(15px);
+        transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s;
+        z-index: 5;
+        box-sizing: border-box;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .panel-content.active-panel {
+        opacity: 1;
+        transform: translateY(0);
+        visibility: visible;
+        pointer-events: auto;
+      }
+
+      #panel-home {
+        justify-content: center;
+        align-items: center;
+      }
+
       /* Hoverable Glassmorphic Action Cards */
       .dashboard-grid {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-        width: 85%;
-        max-width: 700px;
+        gap: 28px;
+        width: 100%;
+        max-width: 860px;
+        height: 94%;
+        margin: auto;
         box-sizing: border-box;
         z-index: 5;
+      }
+
+      /* Bengali Message Board & Keyboard Styles */
+      .keyboard-input-container {
+        width: 100%;
+        height: 80px;
+        background: rgba(15, 23, 42, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 12px 16px;
+        box-sizing: border-box;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .keyboard-text-display {
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        border: none;
+        font-family: "Plus Jakarta Sans", "Vrinda", sans-serif;
+        font-size: 26px;
+        font-weight: 600;
+        color: var(--accent-cyan);
+        text-shadow: 0 0 10px rgba(0, 255, 213, 0.3);
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+        outline: none;
+        display: flex;
+        align-items: center;
+        scrollbar-width: none;
+      }
+
+      .keyboard-text-display::-webkit-scrollbar {
+        display: none;
+      }
+
+      .keyboard-text-display:empty::before {
+        content: attr(placeholder);
+        color: rgba(156, 163, 175, 0.3);
+        text-shadow: none;
+      }
+
+      .prediction-bar {
+        display: flex;
+        gap: 12px;
+        width: 100%;
+        height: 48px;
+        margin-bottom: 12px;
+        box-sizing: border-box;
+      }
+
+      .prediction-chip {
+        flex: 1;
+        background: rgba(168, 85, 247, 0.08);
+        border: 1px solid rgba(168, 85, 247, 0.2);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 700;
+        color: #c084fc;
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        user-select: none;
+        text-shadow: 0 0 6px rgba(192, 132, 252, 0.2);
+      }
+
+      .prediction-chip.gaze-hover {
+        border-color: var(--accent-cyan);
+        background: rgba(0, 255, 213, 0.1);
+        color: var(--accent-cyan);
+        box-shadow: 0 0 15px rgba(0, 255, 213, 0.2);
+        transform: translateY(-2px);
+        text-shadow: 0 0 10px rgba(0, 255, 213, 0.4);
+      }
+
+      .keyboard-grid {
+        display: grid;
+        grid-template-rows: repeat(4, 1fr);
+        gap: 10px;
+        width: 100%;
+        height: 375px;
+        box-sizing: border-box;
+      }
+
+      .keyboard-row {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+        height: 100%;
+      }
+
+      .key {
+        flex: 1;
+        background: rgba(15, 23, 42, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        font-weight: 600;
+        color: var(--text-main);
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        user-select: none;
+        box-sizing: border-box;
+      }
+
+      .key.gaze-hover {
+        border-color: var(--accent-cyan);
+        background: rgba(0, 255, 213, 0.08);
+        box-shadow: 0 0 15px rgba(0, 255, 213, 0.15);
+        transform: translateY(-2px) scale(1.02);
+      }
+
+      /* Keyboard styling modifiers & actions */
+      .modifier-key {
+        color: #f472b6;
+        background: rgba(244, 114, 182, 0.05);
+        border-color: rgba(244, 114, 182, 0.15);
+      }
+
+      .modifier-key.gaze-hover {
+        border-color: #f472b6;
+        background: rgba(244, 114, 182, 0.12);
+        color: #ffffff;
+        box-shadow: 0 0 15px rgba(244, 114, 182, 0.25);
+      }
+
+      .action-key {
+        font-weight: 700;
+        font-size: 17px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .clear-key {
+        color: var(--accent-red);
+        background: rgba(239, 68, 68, 0.05);
+        border-color: rgba(239, 68, 68, 0.15);
+      }
+
+      .clear-key.gaze-hover {
+        border-color: var(--accent-red);
+        background: rgba(239, 68, 68, 0.15);
+        color: #ffffff;
+        box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+      }
+
+      .backspace-key {
+        color: var(--accent-yellow);
+        background: rgba(245, 158, 11, 0.05);
+        border-color: rgba(245, 158, 11, 0.15);
+      }
+
+      .backspace-key.gaze-hover {
+        border-color: var(--accent-yellow);
+        background: rgba(245, 158, 11, 0.15);
+        color: #ffffff;
+        box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+      }
+
+      .space-key {
+        color: var(--accent-cyan);
+        background: rgba(0, 255, 213, 0.05);
+        border-color: rgba(0, 255, 213, 0.15);
+      }
+
+      .space-key.gaze-hover {
+        border-color: var(--accent-cyan);
+        background: rgba(0, 255, 213, 0.15);
+        color: #ffffff;
+        box-shadow: 0 0 20px rgba(0, 255, 213, 0.4);
+      }
+
+      .speak-key {
+        color: var(--accent-green);
+        background: rgba(16, 185, 129, 0.05);
+        border-color: rgba(16, 185, 129, 0.15);
+      }
+
+      .speak-key.gaze-hover {
+        border-color: var(--accent-green);
+        background: rgba(16, 185, 129, 0.15);
+        color: #ffffff;
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
       }
 
       .card {
         background: rgba(15, 23, 42, 0.45);
         border: 1.5px solid rgba(255, 255, 255, 0.05);
-        border-radius: 16px;
-        padding: 20px;
+        border-radius: 18px;
+        padding: 28px;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 8px;
+        gap: 14px;
         cursor: pointer;
         backdrop-filter: blur(8px);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        min-height: 140px;
+        min-height: 190px;
         box-sizing: border-box;
         position: relative;
         overflow: hidden;
@@ -202,7 +475,7 @@
       }
 
       .card-icon {
-        font-size: 32px;
+        font-size: 48px;
         transition: transform 0.3s ease;
         z-index: 1;
       }
@@ -212,7 +485,7 @@
       }
 
       .card-title {
-        font-size: 11px;
+        font-size: 14px;
         letter-spacing: 1.5px;
         font-weight: 700;
         color: var(--text-sub);
@@ -221,7 +494,7 @@
       }
 
       .card-status {
-        font-size: 14px;
+        font-size: 20px;
         font-weight: 600;
         color: var(--text-main);
         z-index: 1;
@@ -443,29 +716,37 @@
         color: var(--text-main);
       }
 
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
       .diagnostics-panel {
-        position: absolute;
-        top: 20px;
-        right: 20px;
         background: var(--panel-bg);
         border: 1px solid var(--border-color);
-        padding: 12px 18px;
-        border-radius: 16px;
+        padding: 6px 16px;
+        border-radius: 9999px;
         font-family: "JetBrains Mono", monospace;
         font-size: 11px;
         display: flex;
-        flex-direction: column;
-        gap: 6px;
-        z-index: 20;
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
         backdrop-filter: blur(12px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
-        max-width: 250px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       }
 
       .diag-row {
         display: flex;
-        justify-content: space-between;
-        gap: 12px;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .diag-divider {
+        width: 1px;
+        height: 12px;
+        background: rgba(255, 255, 255, 0.15);
       }
 
       .diag-label {
@@ -511,51 +792,133 @@
           <span class="logo">DRISHTI</span>
           <span class="subtitle">REAL-TIME EYE-TRACKING VIEWER</span>
         </div>
-        <div class="status-pill">
-          <div class="status-dot connecting" id="status-dot"></div>
-          <span id="status-badge">CONNECTING</span>
+        <div class="header-right">
+          <!-- Diagnostics Horizontal Panel -->
+          <div class="diagnostics-panel">
+            <div class="diag-row">
+              <span class="diag-label">WS:</span>
+              <span class="diag-value" id="ws-state">CONNECTING</span>
+            </div>
+            <div class="diag-divider"></div>
+            <div class="diag-row" style="max-width: 180px;">
+              <span class="diag-label">MSG:</span>
+              <span class="diag-value" id="last-msg">NONE</span>
+            </div>
+          </div>
+          <!-- Status Pill -->
+          <div class="status-pill">
+            <div class="status-dot connecting" id="status-dot"></div>
+            <span id="status-badge">CONNECTING</span>
+          </div>
         </div>
       </header>
 
       <div class="frame-wrapper">
-        <div class="diagnostics-panel">
-          <div class="diag-row">
-            <span class="diag-label">WS:</span>
-            <span class="diag-value" id="ws-state">CONNECTING</span>
-          </div>
-          <div class="diag-row">
-            <span class="diag-label">MSG:</span>
-            <span class="diag-value" id="last-msg">NONE</span>
-          </div>
-        </div>
 
         <div class="frame" id="frame">
           <div class="grid-lines"></div>
 
-          <!-- Glassmorphism Actions Grid -->
-          <div class="dashboard-grid">
-            <div class="card gaze-interactive" id="card-light" data-action="light">
-              <div class="card-icon">💡</div>
-              <div class="card-title">SMART LIGHTS</div>
-              <div class="card-status" id="status-light">OFF</div>
+          <!-- Tab Navigation -->
+          <div class="tab-navigation">
+            <div class="tab-btn gaze-interactive" id="tab-home" data-action="tab-home">
+              <span>🏠</span> স্মার্ট হোম (Smart Home)
             </div>
-            <div class="card gaze-interactive" id="card-media" data-action="media">
-              <div class="card-icon">🎵</div>
-              <div class="card-title">SOUND SYSTEM</div>
-              <div class="card-status" id="status-media">STOPPED</div>
-              <div class="eq-bars" id="eq-bars">
-                <span></span><span></span><span></span><span></span>
+            <div class="tab-btn active-tab gaze-interactive" id="tab-keyboard" data-action="tab-keyboard">
+              <span>⌨️</span> বার্তা বোর্ড (Message Board)
+            </div>
+          </div>
+
+          <!-- Smart Home Panel -->
+          <div class="panel-content" id="panel-home">
+            <div class="dashboard-grid">
+              <div class="card gaze-interactive" id="card-light" data-action="light">
+                <div class="card-icon">💡</div>
+                <div class="card-title">SMART LIGHTS</div>
+                <div class="card-status" id="status-light">OFF</div>
+              </div>
+              <div class="card gaze-interactive" id="card-media" data-action="media">
+                <div class="card-icon">🎵</div>
+                <div class="card-title">SOUND SYSTEM</div>
+                <div class="card-status" id="status-media">STOPPED</div>
+                <div class="eq-bars" id="eq-bars">
+                  <span></span><span></span><span></span><span></span>
+                </div>
+              </div>
+              <div class="card gaze-interactive" id="card-lock" data-action="lock">
+                <div class="card-icon">🔒</div>
+                <div class="card-title">SYSTEM SECURE</div>
+                <div class="card-status" id="status-lock">SECURE</div>
+              </div>
+              <div class="card gaze-interactive" id="card-recalibrate" data-action="recalibrate">
+                <div class="card-icon">🔄</div>
+                <div class="card-title">RE-CALIBRATE</div>
+                <div class="card-status">RESET STATE</div>
               </div>
             </div>
-            <div class="card gaze-interactive" id="card-lock" data-action="lock">
-              <div class="card-icon">🔒</div>
-              <div class="card-title">SYSTEM SECURE</div>
-              <div class="card-status" id="status-lock">SECURE</div>
+          </div>
+
+          <!-- Message Board Panel -->
+          <div class="panel-content active-panel" id="panel-keyboard">
+            <!-- Text Input & Output Card -->
+            <div class="keyboard-input-container">
+              <div class="keyboard-text-display" id="keyboard-text-display" placeholder="এখানে আপনার বার্তাটি টাইপ করুন..."></div>
             </div>
-            <div class="card gaze-interactive" id="card-recalibrate" data-action="recalibrate">
-              <div class="card-icon">🔄</div>
-              <div class="card-title">RE-CALIBRATE</div>
-              <div class="card-status">RESET STATE</div>
+            
+            <!-- Prediction Bar -->
+            <div class="prediction-bar" id="prediction-bar">
+              <div class="prediction-chip gaze-interactive" data-action="predict" id="pred-0">আমি</div>
+              <div class="prediction-chip gaze-interactive" data-action="predict" id="pred-1">ভালো</div>
+              <div class="prediction-chip gaze-interactive" data-action="predict" id="pred-2">আছি</div>
+            </div>
+
+            <!-- Virtual Keyboard -->
+            <div class="keyboard-grid">
+              <!-- Row 1: Vowels & Modifiers -->
+              <div class="keyboard-row">
+                <div class="key gaze-interactive" data-action="key" data-value="অ">অ</div>
+                <div class="key gaze-interactive" data-action="key" data-value="আ">আ</div>
+                <div class="key gaze-interactive" data-action="key" data-value="ই">ই</div>
+                <div class="key gaze-interactive" data-action="key" data-value="উ">উ</div>
+                <div class="key gaze-interactive" data-action="key" data-value="এ">এ</div>
+                <div class="key gaze-interactive" data-action="key" data-value="ও">ও</div>
+                <div class="key gaze-interactive modifier-key" data-action="key" data-value="া">া</div>
+                <div class="key gaze-interactive modifier-key" data-action="key" data-value="ি">ি</div>
+                <div class="key gaze-interactive modifier-key" data-action="key" data-value="ী">ী</div>
+                <div class="key gaze-interactive modifier-key" data-action="key" data-value="ু">ু</div>
+                <div class="key gaze-interactive modifier-key" data-action="key" data-value="ে">ে</div>
+                <div class="key gaze-interactive modifier-key" data-action="key" data-value="ো">ো</div>
+              </div>
+              <!-- Row 2: Consonants Part 1 -->
+              <div class="keyboard-row">
+                <div class="key gaze-interactive" data-action="key" data-value="ক">ক</div>
+                <div class="key gaze-interactive" data-action="key" data-value="গ">গ</div>
+                <div class="key gaze-interactive" data-action="key" data-value="চ">চ</div>
+                <div class="key gaze-interactive" data-action="key" data-value="জ">জ</div>
+                <div class="key gaze-interactive" data-action="key" data-value="ত">ত</div>
+                <div class="key gaze-interactive" data-action="key" data-value="দ">দ</div>
+                <div class="key gaze-interactive" data-action="key" data-value="ন">ন</div>
+                <div class="key gaze-interactive" data-action="key" data-value="প">প</div>
+                <div class="key gaze-interactive" data-action="key" data-value="ব">ব</div>
+              </div>
+              <!-- Row 3: Consonants Part 2 -->
+              <div class="keyboard-row">
+                <div class="key gaze-interactive" data-action="key" data-value="ম">ম</div>
+                <div class="key gaze-interactive" data-action="key" data-value="য">য</div>
+                <div class="key gaze-interactive" data-action="key" data-value="র">র</div>
+                <div class="key gaze-interactive" data-action="key" data-value="ল">ল</div>
+                <div class="key gaze-interactive" data-action="key" data-value="শ">শ</div>
+                <div class="key gaze-interactive" data-action="key" data-value="স">স</div>
+                <div class="key gaze-interactive" data-action="key" data-value="হ">হ</div>
+                <div class="key gaze-interactive" data-action="key" data-value="ড়">ড়</div>
+                <div class="key gaze-interactive" data-action="key" data-value="য়">য়</div>
+              </div>
+              <!-- Row 4: Action Keys -->
+              <div class="keyboard-row">
+                <div class="key gaze-interactive action-key clear-key" data-action="clear" style="flex: 1.5">মুছুন</div>
+                <div class="key gaze-interactive action-key backspace-key" data-action="backspace" style="flex: 1.5">ব্যাকস্পেস</div>
+                <div class="key gaze-interactive action-key space-key" data-action="space" style="flex: 4.5">স্পেস</div>
+                <div class="key gaze-interactive action-key speak-key" data-action="speak" style="flex: 2.5">কথা বলুন 🔊</div>
+              </div>
             </div>
           </div>
 
@@ -617,12 +980,41 @@
       let mediaState = false;
       let lockState = false;
 
+      // Bengali virtual keyboard typing buffer
+      let typedText = "";
+
+      // Offline NLP Predictive Engine Data
+      const BENGALI_VOCAB = [
+        "আমি", "তুমি", "আমরা", "তোমরা", "কেমন", "আছি", "আছো", "আছেন", "ভালো", "ভাত", 
+        "খাই", "খাবে", "খাবো", "যাবো", "কোথায়", "দেশ", "ভাষা", "বাংলাদেশ", "ধন্যবাদ", 
+        "অনেক", "আপনাকে", "খবর", "কাজ", "করছি", "করো", "করুন", "সব", "সুন্দর", "বাংলা", 
+        "হ্যাঁ", "না", "কি", "কেন", "কিভাবে", "নতুন", "আজ", "কাল", "এখন", "পরে", "সাথে", 
+        "তোমার", "আমার", "আমাদের", "প্রিয়"
+      ];
+
+      const BIGRAM_MAP = {
+        "আমি": ["ভালো", "আছি", "ভাত", "যাবো", "করছি", "খাবো"],
+        "তুমি": ["কেমন", "আছো", "কোথায়", "খাবে", "তোমার"],
+        "আমরা": ["ভালো", "যাবো", "ভাত", "সবাই", "বাংলাদেশ"],
+        "কেমন": ["আছো", "আছেন", "খবর", "আছ"],
+        "ভালো": ["আছি", "থেকো", "লাগছে", "বাসি", "লাগে"],
+        "ধন্যবাদ": ["আপনাকে", "অনেক", "বন্ধু", "সবাইকে"],
+        "বাংলাদেশ": ["আমাদের", "আমার", "অনেক", "সুন্দর"],
+        "বাংলা": ["ভাষা", "আমার", "ফন্ট", "দেশ"],
+        "আমার": ["নাম", "দেশ", "সোনার", "প্রিয়", "কাজ"],
+        "তোমার": ["নাম", "দেশ", "কাজ", "খবর", "বাড়ি"],
+        "আজ": ["অনেক", "বৃষ্টি", "গরম", "ছুটি", "কাজ"],
+        "এখন": ["যাবো", "করছি", "আমি", "তুমি", "ভাত"],
+        "অনেক": ["ভালো", "ধন্যবাদ", "সুন্দর", "কষ্ট"],
+        "প্রিয়": ["বন্ধু", "ভাষা", "মানুষ", "দেশ"]
+      };
+
       // Gaze Stabilization Filter States (Adaptive EMA)
       let filteredX = null;
       let filteredY = null;
-      const alphaMin = 0.015; // Stronger noise rejection during static fixation (dead-zone effect)
-      const alphaMax = 0.95; // Ultra-fast response for rapid gaze changes (saccades)
-      const dThreshold = 0.12; // Expanded threshold to isolate micro-jitter and tremors
+      const alphaMin = 0.003;  // Absolute rock-solid target fixation stability (was 0.005)
+      const alphaMax = 0.07;   // Extremely slow, calm, and predictable glide (was 0.10)
+      const dThreshold = 0.28; // Broad dead-zone to absorb large involuntary micro-movements (was 0.25)
 
       // Web Audio Synthesizer Beeps
       function playBeep(type) {
@@ -764,12 +1156,32 @@
           hasTriggered = false;
           playBeep('hover');
 
-          const name = currentHoveredElement.querySelector(".card-title").textContent;
-          logTerminal(`Focus locked on dashboard control: ${name}`, 'gaze');
+          let name = "Interactive Element";
+          const cardTitle = currentHoveredElement.querySelector(".card-title");
+          if (cardTitle) {
+            name = cardTitle.textContent;
+          } else if (currentHoveredElement.classList.contains("key")) {
+            name = `Key [${currentHoveredElement.textContent.trim()}]`;
+          } else if (currentHoveredElement.classList.contains("prediction-chip")) {
+            name = `Prediction [${currentHoveredElement.textContent.trim()}]`;
+          } else if (currentHoveredElement.classList.contains("tab-btn")) {
+            name = `Tab [${currentHoveredElement.textContent.trim()}]`;
+          }
+          logTerminal(`Focus locked: ${name}`, 'gaze');
         } else {
           if (currentHoveredElement) {
             currentHoveredElement.classList.remove("gaze-hover");
-            const name = currentHoveredElement.querySelector(".card-title").textContent;
+            let name = "Interactive Element";
+            const cardTitle = currentHoveredElement.querySelector(".card-title");
+            if (cardTitle) {
+              name = cardTitle.textContent;
+            } else if (currentHoveredElement.classList.contains("key")) {
+              name = `Key [${currentHoveredElement.textContent.trim()}]`;
+            } else if (currentHoveredElement.classList.contains("prediction-chip")) {
+              name = `Prediction [${currentHoveredElement.textContent.trim()}]`;
+            } else if (currentHoveredElement.classList.contains("tab-btn")) {
+              name = `Tab [${currentHoveredElement.textContent.trim()}]`;
+            }
             logTerminal(`Focus lost: ${name}`, 'gaze');
           }
           currentHoveredElement = null;
@@ -839,6 +1251,39 @@
           setTimeout(() => {
             frame.style.boxShadow = "";
           }, 350);
+        } else if (action === "tab-home") {
+          switchTab("home");
+        } else if (action === "tab-keyboard") {
+          switchTab("keyboard");
+        } else if (action === "key") {
+          const val = element.getAttribute("data-value");
+          typedText += val;
+          updateTextDisplay();
+          logTerminal(`Typed character: ${val}`, "evt");
+        } else if (action === "space") {
+          if (typedText.length > 0 && typedText[typedText.length - 1] !== " ") {
+            typedText += " ";
+            updateTextDisplay();
+            logTerminal("Typed: [SPACE]", "evt");
+          }
+        } else if (action === "backspace") {
+          if (typedText.length > 0) {
+            const removed = typedText[typedText.length - 1];
+            typedText = typedText.substring(0, typedText.length - 1);
+            updateTextDisplay();
+            logTerminal(`Removed character: ${removed}`, "evt");
+          }
+        } else if (action === "clear") {
+          typedText = "";
+          updateTextDisplay();
+          logTerminal("Cleared text buffer", "sys");
+        } else if (action === "speak") {
+          speakTypedText();
+        } else if (action === "predict") {
+          const word = element.textContent;
+          if (word && word !== "---") {
+            selectPrediction(word);
+          }
         }
       }
 
@@ -867,6 +1312,166 @@
 
       // Start the frame animation thread
       requestAnimationFrame(animateDwellRing);
+
+      // Switch Between Panels
+      function switchTab(tabName) {
+        const tabHome = document.getElementById("tab-home");
+        const tabKeyboard = document.getElementById("tab-keyboard");
+        const panelHome = document.getElementById("panel-home");
+        const panelKeyboard = document.getElementById("panel-keyboard");
+
+        if (tabName === "home") {
+          tabHome.classList.add("active-tab");
+          tabKeyboard.classList.remove("active-tab");
+          
+          panelKeyboard.classList.remove("active-panel");
+          panelHome.classList.add("active-panel");
+          
+          logTerminal("Switched tab to: Smart Home", "sys");
+        } else if (tabName === "keyboard") {
+          tabKeyboard.classList.add("active-tab");
+          tabHome.classList.remove("active-tab");
+          
+          panelHome.classList.remove("active-panel");
+          panelKeyboard.classList.add("active-panel");
+          
+          updatePredictionBar(); // Load initial default predictions
+          logTerminal("Switched tab to: Message Board (Bengali Keyboard)", "sys");
+        }
+      }
+
+      // Update Text display and trigger prediction
+      function updateTextDisplay() {
+        const textDisplay = document.getElementById("keyboard-text-display");
+        textDisplay.textContent = typedText;
+        updatePredictionBar();
+      }
+
+      // Offline NLP Predictive Engine
+      function updatePredictionBar() {
+        const text = typedText;
+        
+        // Find the active word (everything after the last space)
+        const spaceIndex = text.lastIndexOf(" ");
+        const activeWord = spaceIndex === -1 ? text : text.substring(spaceIndex + 1);
+        
+        let predictions = [];
+        
+        if (activeWord.length > 0) {
+          // 1. Prefix matching
+          predictions = BENGALI_VOCAB.filter(w => w.startsWith(activeWord));
+          logTerminal(`Prefix matching for [${activeWord}]: found ${predictions.length} matches`, "sys");
+        } else {
+          // 2. Bigram next-word suggestion
+          const trimmed = text.trim();
+          if (trimmed.length > 0) {
+            const words = trimmed.split(" ");
+            const lastWord = words[words.length - 1];
+            if (BIGRAM_MAP[lastWord]) {
+              predictions = [...BIGRAM_MAP[lastWord]];
+              logTerminal(`Bigram suggestions for [${lastWord}]: ${predictions.join(", ")}`, "sys");
+            }
+          }
+        }
+        
+        // Fill up to 3 predictions with high-frequency default words if we have fewer
+        const defaults = ["আমি", "ভালো", "ধন্যবাদ", "বাংলাদেশ", "কেমন"];
+        for (const word of defaults) {
+          if (predictions.length >= 3) break;
+          if (!predictions.includes(word) && (activeWord.length === 0 || word.startsWith(activeWord))) {
+            predictions.push(word);
+          }
+        }
+        
+        // Final fallback to fill exactly 3 slots
+        for (const word of defaults) {
+          if (predictions.length >= 3) break;
+          if (!predictions.includes(word)) {
+            predictions.push(word);
+          }
+        }
+        
+        // Display them in the three prediction chips
+        for (let i = 0; i < 3; i++) {
+          const chip = document.getElementById(`pred-${i}`);
+          if (predictions[i]) {
+            chip.textContent = predictions[i];
+            chip.style.visibility = "visible";
+          } else {
+            chip.textContent = "---";
+            chip.style.visibility = "hidden";
+          }
+        }
+      }
+
+      // Selection of predicted word
+      function selectPrediction(word) {
+        const words = typedText.split(" ");
+        if (words.length > 0 && typedText[typedText.length - 1] !== " ") {
+          words[words.length - 1] = word;
+          typedText = words.join(" ") + " ";
+        } else {
+          // If ends with space or empty
+          if (typedText.length === 0 || typedText[typedText.length - 1] === " ") {
+            typedText += word + " ";
+          } else {
+            typedText = word + " ";
+          }
+        }
+        updateTextDisplay();
+        logTerminal(`Selected word prediction: ${word}`, "evt");
+      }
+
+      // Web Speech Synthesis TTS
+      function speakTypedText() {
+        if (!typedText || typedText.trim().length === 0) {
+          logTerminal("Speech synthesis error: Text buffer is empty", "sys");
+          return;
+        }
+        
+        if (!window.speechSynthesis) {
+          logTerminal("Speech synthesis error: Web Speech API not supported in this browser", "sys");
+          return;
+        }
+        
+        window.speechSynthesis.cancel();
+        
+        const utterance = new SpeechSynthesisUtterance(typedText.trim());
+        
+        const voices = window.speechSynthesis.getVoices();
+        let bnVoice = voices.find(v => v.lang === "bn-BD" || v.lang === "bn-IN");
+        
+        if (!bnVoice) {
+          bnVoice = voices.find(v => v.lang.startsWith("bn") || v.name.toLowerCase().includes("bengali") || v.name.toLowerCase().includes("bangla"));
+        }
+        
+        if (bnVoice) {
+          utterance.voice = bnVoice;
+          logTerminal(`Selected voice: ${bnVoice.name} (${bnVoice.lang})`, "sys");
+        } else {
+          logTerminal("No dedicated Bengali voice found. Using system default voice.", "sys");
+        }
+        
+        utterance.onstart = () => {
+          logTerminal(`Speaking: "${typedText.trim()}"`, "sys");
+        };
+        
+        utterance.onerror = (e) => {
+          logTerminal(`Speech synthesis error: ${e.error}`, "sys");
+        };
+        
+        window.speechSynthesis.speak(utterance);
+      }
+
+      // Pre-load speech voices
+      if (window.speechSynthesis) {
+        window.speechSynthesis.getVoices();
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+          window.speechSynthesis.onvoiceschanged = () => {
+            window.speechSynthesis.getVoices();
+          };
+        }
+      }
 
       // WebSocket consumer channel
       function connect() {
@@ -904,21 +1509,47 @@
               const rawX = Math.min(Math.max(data.x, 0), 1);
               const rawY = Math.min(Math.max(data.y, 0), 1);
               
+              // Apply boundary-expansion (Sensitivity Multiplier)
+              // Expands the coordinates outward from center to make reaching outer borders effortless
+              const sensitivityX = 1.12;
+              const sensitivityY = 1.12;
+              const centeredX = rawX - 0.5;
+              const centeredY = rawY - 0.5;
+              const scaledX = Math.min(Math.max(centeredX * sensitivityX + 0.5, 0), 1);
+              const scaledY = Math.min(Math.max(centeredY * sensitivityY + 0.5, 0), 1);
+
+              let targetX = scaledX;
+              let targetY = scaledY;
+
+              // Premium Gaze Gravity & Magnetic Snapping
+              // If focusing an element, slightly pull target coordinate towards the center of that key
+              if (currentHoveredElement) {
+                const hoverRect = currentHoveredElement.getBoundingClientRect();
+                const frameRect = frame.getBoundingClientRect();
+                
+                const elemCenterX = (hoverRect.left + hoverRect.width / 2 - frameRect.left) / frameRect.width;
+                const elemCenterY = (hoverRect.top + hoverRect.height / 2 - frameRect.top) / frameRect.height;
+                
+                // Blend 30% of position to center of the button for absolute visual lock-on stability
+                targetX = targetX * 0.70 + elemCenterX * 0.30;
+                targetY = targetY * 0.70 + elemCenterY * 0.30;
+              }
+
               // Adaptive Gaze Smoothing Algorithm
               if (filteredX === null || filteredY === null) {
-                filteredX = rawX;
-                filteredY = rawY;
+                filteredX = targetX;
+                filteredY = targetY;
               } else {
-                const dx = rawX - filteredX;
-                const dy = rawY - filteredY;
+                const dx = targetX - filteredX;
+                const dy = targetY - filteredY;
                 const d = Math.sqrt(dx * dx + dy * dy);
                 
-                // Quartic (4th-power) velocity scaling for aggressive dead-zone filtering
+                // Quartic velocity scaling for highly stabilized, slow dead-zone transition
                 const ratio = Math.min(d / dThreshold, 1.0);
                 const alpha = alphaMin + (alphaMax - alphaMin) * Math.pow(ratio, 4);
                 
-                filteredX = alpha * rawX + (1.0 - alpha) * filteredX;
-                filteredY = alpha * rawY + (1.0 - alpha) * filteredY;
+                filteredX = alpha * targetX + (1.0 - alpha) * filteredX;
+                filteredY = alpha * targetY + (1.0 - alpha) * filteredY;
               }
 
               // Shift tracking cursor coordinate
@@ -945,6 +1576,7 @@
         };
       }
 
+      updateTextDisplay();
       connect();
     </script>
   </body>

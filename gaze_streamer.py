@@ -30,7 +30,7 @@ TARGET_SEND_HZ = 30
 INFER_WIDTH = 320
 
 
-def get_relative_gaze_vector(face_landmarks, corner_history=None, alpha_corner=0.08, prev_gaze=None, alpha_gaze=0.35):
+def get_relative_gaze_vector(face_landmarks, corner_history=None, alpha_corner=0.08, prev_gaze=None, alpha_gaze=0.09):
     if len(face_landmarks) < 478:
         # Fallback to standard tracking if refined iris landmarks are missing
         return (0.0, 0.0), prev_gaze
@@ -179,7 +179,7 @@ def _inference_worker(
                 corner_history=corner_history,
                 alpha_corner=0.08,
                 prev_gaze=prev_gaze,
-                alpha_gaze=0.35
+                alpha_gaze=0.09
             )
             prev_gaze[0] = iris_x
             prev_gaze[1] = iris_y
