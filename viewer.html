@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Drishti Interactive Gaze Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg-color: #030712;
+        --panel-bg: rgba(17, 24, 39, 0.7);
+        --accent-cyan: #00ffd5;
+        --accent-yellow: #f59e0b;
+        --accent-red: #ef4444;
+        --border-color: rgba(31, 41, 55, 0.6);
+        --text-main: #f3f4f6;
+        --text-sub: #9ca3af;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background-color: var(--bg-color);
+        background-image: 
+          radial-gradient(circle at 10% 20%, rgba(0, 255, 213, 0.05) 0%, transparent 40%),
+          radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 40%);
+        color: var(--text-main);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow-x: hidden;
+      }
+
+      .app-container {
+        width: 100%;
+        max-width: 1000px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 16px;
+      }
+
+      .brand {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .logo {
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        background: linear-gradient(135deg, #00ffd5 0%, #8b5cf6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 30px rgba(0, 255, 213, 0.2);
+      }
+
+      .subtitle {
+        font-size: 12px;
+        color: var(--text-sub);
+        font-weight: 500;
+      }
+
+      .status-pill {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--panel-bg);
+        border: 1px solid var(--border-color);
+        padding: 6px 16px;
+        border-radius: 9999px;
+        font-size: 13px;
+        font-weight: 600;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        backdrop-filter: blur(10px);
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: var(--accent-red);
+        box-shadow: 0 0 10px var(--accent-red);
+        transition: all 0.3s ease;
+      }
+
+      .status-dot.connecting {
+        background-color: var(--accent-yellow);
+        box-shadow: 0 0 10px var(--accent-yellow);
+        animation: pulse 1.5s infinite alternate;
+      }
+
+      .status-dot.connected {
+        background-color: var(--accent-cyan);
+        box-shadow: 0 0 10px var(--accent-cyan);
+      }
+
+      .frame-wrapper {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16/10;
+        background: rgba(17, 24, 39, 0.4);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        box-shadow: 
+          0 10px 15px -3px rgba(0, 0, 0, 0.3),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05),
+          inset 0 2px 4px 0 rgba(255, 255, 255, 0.05);
+        overflow: hidden;
+        backdrop-filter: blur(4px);
+      }
+
+      .frame {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        background: radial-gradient(circle at 50% 50%, rgba(17, 24, 39, 0.8) 0%, rgba(3, 7, 18, 0.95) 100%);
+      }
+
+      .grid-lines {
+        position: absolute;
+        inset: 0;
+        background-size: 40px 40px;
+        background-image: 
+          linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        pointer-events: none;
+      }
+
+      /* Hoverable Glassmorphic Action Cards */
+      .dashboard-grid {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        width: 85%;
+        max-width: 700px;
+        box-sizing: border-box;
+        z-index: 5;
+      }
+
+      .card {
+        background: rgba(15, 23, 42, 0.45);
+        border: 1.5px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        min-height: 140px;
+        box-sizing: border-box;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(0, 255, 213, 0.05) 0%, transparent 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .card.gaze-hover {
+        border-color: var(--accent-cyan);
+        background: rgba(0, 255, 213, 0.06);
+        box-shadow: 
+          0 0 25px rgba(0, 255, 213, 0.15),
+          inset 0 0 10px rgba(0, 255, 213, 0.05);
+        transform: translateY(-4px) scale(1.02);
+      }
+
+      .card.gaze-hover::before {
+        opacity: 1;
+      }
+
+      .card-icon {
+        font-size: 32px;
+        transition: transform 0.3s ease;
+        z-index: 1;
+      }
+
+      .card.gaze-hover .card-icon {
+        transform: scale(1.15) rotate(5deg);
+      }
+
+      .card-title {
+        font-size: 11px;
+        letter-spacing: 1.5px;
+        font-weight: 700;
+        color: var(--text-sub);
+        text-transform: uppercase;
+        z-index: 1;
+      }
+
+      .card-status {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-main);
+        z-index: 1;
+        transition: color 0.3s ease;
+      }
+
+      /* Dynamic Card Glowing States */
+      .card.active-light {
+        border-color: var(--accent-yellow) !important;
+        background: rgba(245, 158, 11, 0.08) !important;
+        box-shadow: 0 0 30px rgba(245, 158, 11, 0.2) !important;
+      }
+      .card.active-light .card-status {
+        color: var(--accent-yellow);
+      }
+
+      .card.active-media {
+        border-color: var(--accent-cyan) !important;
+        background: rgba(0, 255, 213, 0.08) !important;
+        box-shadow: 0 0 30px rgba(0, 255, 213, 0.2) !important;
+      }
+      .card.active-media .card-status {
+        color: var(--accent-cyan);
+      }
+
+      /* Audio Equalizer Bars */
+      .eq-bars {
+        display: flex;
+        align-items: flex-end;
+        gap: 3px;
+        height: 16px;
+        margin-top: 4px;
+        opacity: 0.3;
+        transition: opacity 0.3s ease;
+      }
+      .active-media .eq-bars {
+        opacity: 1;
+      }
+      .eq-bars span {
+        display: block;
+        width: 3px;
+        height: 100%;
+        background: var(--accent-cyan);
+        border-radius: 1px;
+      }
+      .active-media .eq-bars span {
+        animation: eq-play 0.8s ease-in-out infinite alternate;
+      }
+      .active-media .eq-bars span:nth-child(1) { animation-delay: 0.1s; }
+      .active-media .eq-bars span:nth-child(2) { animation-delay: 0.4s; }
+      .active-media .eq-bars span:nth-child(3) { animation-delay: 0.2s; }
+      .active-media .eq-bars span:nth-child(4) { animation-delay: 0.5s; }
+
+      @keyframes eq-play {
+        0% { height: 20%; }
+        100% { height: 100%; }
+      }
+
+      /* Hazard Security Lock Alert */
+      .card.active-lock {
+        border-color: var(--accent-red) !important;
+        background: rgba(239, 68, 68, 0.08) !important;
+        box-shadow: 0 0 30px rgba(239, 68, 68, 0.25) !important;
+      }
+      .card.active-lock .card-status {
+        color: var(--accent-red);
+      }
+      .card.active-lock .card-icon {
+        animation: card-shake 0.4s ease infinite;
+      }
+
+      @keyframes card-shake {
+        0%, 100% { transform: rotate(0deg) scale(1.1); }
+        25% { transform: rotate(-5deg) scale(1.1); }
+        75% { transform: rotate(5deg) scale(1.1); }
+      }
+
+      /* Hover Dwell-Progress SVG Core */
+      .dot {
+        width: 36px;
+        height: 36px;
+        background: transparent;
+        border: none;
+        position: absolute;
+        transform: translate(-50%, -50%);
+        transition: none;
+        pointer-events: none;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .dot-core {
+        width: 10px;
+        height: 10px;
+        background: radial-gradient(circle, var(--accent-cyan) 0%, #059669 100%);
+        border-radius: 50%;
+        box-shadow: 0 0 15px var(--accent-cyan), 0 0 5px var(--accent-cyan);
+        position: absolute;
+        border: 1.5px solid #ffffff;
+      }
+
+      .dwell-svg {
+        width: 36px;
+        height: 36px;
+        position: absolute;
+        transform: rotate(-90deg);
+        overflow: visible;
+      }
+
+      .dwell-bg {
+        fill: none;
+        stroke: rgba(255, 255, 255, 0.15);
+        stroke-width: 2.5px;
+      }
+
+      .dwell-progress {
+        fill: none;
+        stroke: var(--accent-cyan);
+        stroke-width: 2.5px;
+        stroke-linecap: round;
+        stroke-dasharray: 94.25;
+        stroke-dashoffset: 94.25; /* 2 * PI * r = 2 * 3.1415 * 15 = 94.25 */
+        transition: stroke-dashoffset 0.06s linear, stroke 0.3s;
+        filter: drop-shadow(0 0 4px var(--accent-cyan));
+      }
+
+      /* Gaze Click Flash Anim */
+      .card.gaze-click-flash {
+        animation: click-flash 0.35s cubic-bezier(0.1, 0.8, 0.2, 1);
+      }
+      @keyframes click-flash {
+        0% { transform: scale(1.03); filter: brightness(1.7); border-color: #ffffff; }
+        100% { transform: scale(1); filter: brightness(1); }
+      }
+
+      /* Cyber-Terminal Log Window */
+      .terminal-container {
+        background: rgba(17, 24, 39, 0.6);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 16px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        color: var(--text-sub);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .terminal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding-bottom: 8px;
+        margin-bottom: 4px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-main);
+        font-size: 10px;
+      }
+
+      .terminal-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .terminal-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #ef4444;
+      }
+      .terminal-dot:nth-child(2) { background: #f59e0b; }
+      .terminal-dot:nth-child(3) { background: #10b981; }
+
+      .terminal-body {
+        max-height: 120px;
+        height: 120px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255,255,255,0.1) transparent;
+      }
+
+      .terminal-row {
+        display: flex;
+        gap: 8px;
+        line-height: 1.4;
+        animation: term-fade 0.2s ease-out;
+      }
+
+      @keyframes term-fade {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .term-time {
+        color: rgba(255, 255, 255, 0.3);
+      }
+
+      .term-tag {
+        font-weight: 500;
+      }
+      .term-tag.gaze { color: var(--accent-cyan); }
+      .term-tag.sys { color: var(--accent-yellow); }
+      .term-tag.evt { color: #8b5cf6; }
+
+      .term-msg {
+        color: var(--text-main);
+      }
+
+      .diagnostics-panel {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: var(--panel-bg);
+        border: 1px solid var(--border-color);
+        padding: 12px 18px;
+        border-radius: 16px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        z-index: 20;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+        max-width: 250px;
+      }
+
+      .diag-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .diag-label {
+        color: var(--text-sub);
+      }
+
+      .diag-value {
+        color: var(--accent-cyan);
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .status-text {
+        text-align: center;
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--text-sub);
+        min-height: 24px;
+        transition: color 0.3s ease;
+      }
+
+      .legend {
+        text-align: center;
+        font-size: 13px;
+        color: rgba(156, 163, 175, 0.6);
+        max-width: 500px;
+        margin: 0 auto;
+        line-height: 1.5;
+      }
+
+      @keyframes pulse {
+        from { opacity: 0.5; }
+        to { opacity: 1; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <header>
+        <div class="brand">
+          <span class="logo">DRISHTI</span>
+          <span class="subtitle">REAL-TIME EYE-TRACKING VIEWER</span>
+        </div>
+        <div class="status-pill">
+          <div class="status-dot connecting" id="status-dot"></div>
+          <span id="status-badge">CONNECTING</span>
+        </div>
+      </header>
+
+      <div class="frame-wrapper">
+        <div class="diagnostics-panel">
+          <div class="diag-row">
+            <span class="diag-label">WS:</span>
+            <span class="diag-value" id="ws-state">CONNECTING</span>
+          </div>
+          <div class="diag-row">
+            <span class="diag-label">MSG:</span>
+            <span class="diag-value" id="last-msg">NONE</span>
+          </div>
+        </div>
+
+        <div class="frame" id="frame">
+          <div class="grid-lines"></div>
+
+          <!-- Glassmorphism Actions Grid -->
+          <div class="dashboard-grid">
+            <div class="card gaze-interactive" id="card-light" data-action="light">
+              <div class="card-icon">💡</div>
+              <div class="card-title">SMART LIGHTS</div>
+              <div class="card-status" id="status-light">OFF</div>
+            </div>
+            <div class="card gaze-interactive" id="card-media" data-action="media">
+              <div class="card-icon">🎵</div>
+              <div class="card-title">SOUND SYSTEM</div>
+              <div class="card-status" id="status-media">STOPPED</div>
+              <div class="eq-bars" id="eq-bars">
+                <span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+            <div class="card gaze-interactive" id="card-lock" data-action="lock">
+              <div class="card-icon">🔒</div>
+              <div class="card-title">SYSTEM SECURE</div>
+              <div class="card-status" id="status-lock">SECURE</div>
+            </div>
+            <div class="card gaze-interactive" id="card-recalibrate" data-action="recalibrate">
+              <div class="card-icon">🔄</div>
+              <div class="card-title">RE-CALIBRATE</div>
+              <div class="card-status">RESET STATE</div>
+            </div>
+          </div>
+
+          <!-- Cursor with SVG Dwell Progress Ring -->
+          <div class="dot" id="dot" style="left: 50%; top: 50%">
+            <svg class="dwell-svg" width="36" height="36" viewBox="0 0 36 36">
+              <circle class="dwell-bg" cx="18" cy="18" r="15"></circle>
+              <circle class="dwell-progress" id="dwell-ring" cx="18" cy="18" r="15"></circle>
+            </svg>
+            <div class="dot-core"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="status-text" id="status-text">Establishing connection to local backend...</div>
+
+      <!-- Cyber-Terminal Event Log Container -->
+      <div class="terminal-container">
+        <div class="terminal-header">
+          <span>🖥️ DRISHTI CYBER-TERMINAL EVENT LOG</span>
+          <div class="terminal-actions">
+            <div class="terminal-dot"></div>
+            <div class="terminal-dot"></div>
+            <div class="terminal-dot"></div>
+          </div>
+        </div>
+        <div class="terminal-body" id="terminal-body">
+          <div class="terminal-row">
+            <span class="term-time">[00:00:00.000]</span>
+            <span class="term-tag sys">[SYS]</span>
+            <span class="term-msg">Logging interface initialized. Awaiting gaze coordinates...</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="legend">Ensure the python gaze streamer is active and calibrated. Hover the cursor dot over any dashboard card for 1 second to select it hands-free.</div>
+    </div>
+
+    <script>
+      const statusText = document.getElementById("status-text");
+      const statusDot = document.getElementById("status-dot");
+      const statusBadge = document.getElementById("status-badge");
+      const wsState = document.getElementById("ws-state");
+      const lastMsg = document.getElementById("last-msg");
+      const dot = document.getElementById("dot");
+      const frame = document.getElementById("frame");
+      const dwellRing = document.getElementById("dwell-ring");
+      const terminalBody = document.getElementById("terminal-body");
+
+      // State Trackers
+      let currentHoveredElement = null;
+      let dwellStartTime = null;
+      let dwellDuration = 1000; // 1.0s dwell duration
+      let hasTriggered = false;
+      let audioCtx = null;
+
+      // Click Action States
+      let lightState = false;
+      let mediaState = false;
+      let lockState = false;
+
+      // Web Audio Synthesizer Beeps
+      function playBeep(type) {
+        try {
+          if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          }
+          if (audioCtx.state === "suspended") {
+            audioCtx.resume();
+          }
+
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          if (type === 'hover') {
+            osc.frequency.setValueAtTime(440, audioCtx.currentTime); // A4
+            gain.gain.setValueAtTime(0.015, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.08);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.08);
+          } else if (type === 'click') {
+            osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.08); // A5 chirp
+            gain.gain.setValueAtTime(0.07, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.35);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.35);
+          }
+        } catch (e) {
+          // Fallback if audio API is blocked
+        }
+      }
+
+      // Cyber Terminal Logger
+      function logTerminal(message, tag = "gaze") {
+        const now = new Date();
+        const timeStr = now.toTimeString().split(' ')[0] + '.' + String(now.getMilliseconds()).padStart(3, '0');
+        
+        const row = document.createElement("div");
+        row.className = "terminal-row";
+        
+        const timeSpan = document.createElement("span");
+        timeSpan.className = "term-time";
+        timeSpan.textContent = `[${timeStr}]`;
+        
+        const tagSpan = document.createElement("span");
+        tagSpan.className = `term-tag ${tag}`;
+        tagSpan.textContent = `[${tag.toUpperCase()}]`;
+        
+        const msgSpan = document.createElement("span");
+        msgSpan.className = "term-msg";
+        msgSpan.textContent = message;
+        
+        row.appendChild(timeSpan);
+        row.appendChild(tagSpan);
+        row.appendChild(msgSpan);
+        
+        terminalBody.appendChild(row);
+        
+        while (terminalBody.children.length > 50) {
+          terminalBody.removeChild(terminalBody.firstChild);
+        }
+        
+        terminalBody.scrollTop = terminalBody.scrollHeight;
+      }
+
+      function updateStatus(state, details) {
+        if (state === "connecting") {
+          statusDot.className = "status-dot connecting";
+          statusDot.style.backgroundColor = "var(--accent-yellow)";
+          statusBadge.textContent = "CONNECTING";
+          wsState.textContent = "CONNECTING";
+          wsState.style.color = "var(--accent-yellow)";
+          statusText.textContent = details || "Connecting to ws://127.0.0.1:8000/ws/consumer";
+          statusText.style.color = "var(--text-sub)";
+        } else if (state === "error" || state === "closed") {
+          statusDot.className = "status-dot";
+          statusDot.style.backgroundColor = "var(--accent-red)";
+          statusBadge.textContent = "DISCONNECTED";
+          wsState.textContent = state.toUpperCase();
+          wsState.style.color = "var(--accent-red)";
+          statusText.textContent = details || "Connection offline. Retrying...";
+          statusText.style.color = "var(--accent-red)";
+        } else if (state === "waiting") {
+          statusDot.className = "status-dot connected";
+          statusDot.style.backgroundColor = "var(--accent-cyan)";
+          statusBadge.textContent = "ONLINE";
+          wsState.textContent = "OPEN";
+          wsState.style.color = "var(--accent-cyan)";
+          statusText.textContent = "Connected. Waiting for streamer...";
+          statusText.style.color = "var(--text-main)";
+        } else if (state === "calibrating") {
+          statusDot.className = "status-dot connected";
+          statusDot.style.backgroundColor = "var(--accent-yellow)";
+          statusBadge.textContent = "CALIBRATING";
+          wsState.textContent = "OPEN";
+          wsState.style.color = "var(--accent-cyan)";
+          statusText.textContent = details;
+          statusText.style.color = "var(--accent-yellow)";
+        } else if (state === "active") {
+          statusDot.className = "status-dot connected";
+          statusDot.style.backgroundColor = "var(--accent-cyan)";
+          statusBadge.textContent = "TRACKING ACTIVE";
+          wsState.textContent = "OPEN";
+          wsState.style.color = "var(--accent-cyan)";
+          statusText.textContent = "Synchronized. Gaze tracking active.";
+          statusText.style.color = "var(--accent-cyan)";
+        }
+      }
+
+      // Element Lookup via Client-Coordinates Collision Mapping
+      function updateHoverState(x, y) {
+        const rect = frame.getBoundingClientRect();
+        const clientX = rect.left + x * rect.width;
+        const clientY = rect.top + y * rect.height;
+
+        const targetElement = document.elementFromPoint(clientX, clientY);
+        const interactive = targetElement ? targetElement.closest('.gaze-interactive') : null;
+
+        if (interactive) {
+          if (currentHoveredElement === interactive) {
+            // Still hovering same item
+            return;
+          }
+
+          if (currentHoveredElement) {
+            currentHoveredElement.classList.remove("gaze-hover");
+          }
+
+          currentHoveredElement = interactive;
+          currentHoveredElement.classList.add("gaze-hover");
+          dwellStartTime = performance.now();
+          hasTriggered = false;
+          playBeep('hover');
+
+          const name = currentHoveredElement.querySelector(".card-title").textContent;
+          logTerminal(`Focus locked on dashboard control: ${name}`, 'gaze');
+        } else {
+          if (currentHoveredElement) {
+            currentHoveredElement.classList.remove("gaze-hover");
+            const name = currentHoveredElement.querySelector(".card-title").textContent;
+            logTerminal(`Focus lost: ${name}`, 'gaze');
+          }
+          currentHoveredElement = null;
+          dwellStartTime = null;
+          hasTriggered = false;
+        }
+      }
+
+      // Action Dispatcher
+      function triggerClick(element) {
+        playBeep('click');
+        const action = element.getAttribute("data-action");
+
+        // UI flash confirmation ripple
+        element.classList.add("gaze-click-flash");
+        setTimeout(() => element.classList.remove("gaze-click-flash"), 350);
+
+        if (action === "light") {
+          lightState = !lightState;
+          const card = document.getElementById("card-light");
+          const status = document.getElementById("status-light");
+          if (lightState) {
+            card.classList.add("active-light");
+            status.textContent = "ON";
+            logTerminal("Smart Lights set to status [ON]", "evt");
+          } else {
+            card.classList.remove("active-light");
+            status.textContent = "OFF";
+            logTerminal("Smart Lights set to status [OFF]", "evt");
+          }
+        } else if (action === "media") {
+          mediaState = !mediaState;
+          const card = document.getElementById("card-media");
+          const status = document.getElementById("status-media");
+          if (mediaState) {
+            card.classList.add("active-media");
+            status.textContent = "PLAYING";
+            logTerminal("Sound System: [PLAYING] - File: 'Resonance_Wave.flac'", "evt");
+          } else {
+            card.classList.remove("active-media");
+            status.textContent = "STOPPED";
+            logTerminal("Sound System: [STOPPED]", "evt");
+          }
+        } else if (action === "lock") {
+          lockState = !lockState;
+          const card = document.getElementById("card-lock");
+          const status = document.getElementById("status-lock");
+          const icon = card.querySelector(".card-icon");
+          if (lockState) {
+            card.classList.add("active-lock");
+            status.textContent = "ALERT MODE ACTIVE";
+            icon.textContent = "🚨";
+            logTerminal("SECURITY SYSTEM ENGAGED. Lock mechanism: HIGH ALERT", "sys");
+          } else {
+            card.classList.remove("active-lock");
+            status.textContent = "SECURE";
+            icon.textContent = "🔒";
+            logTerminal("Security system normalized. Status: [SECURE]", "sys");
+          }
+        } else if (action === "recalibrate") {
+          logTerminal("Drishti soft recalibration requested via gaze click.", "sys");
+          statusText.textContent = "Soft calibration reset. Look at camera points.";
+          statusText.style.color = "var(--accent-yellow)";
+
+          // Glow screen outline flash
+          frame.style.boxShadow = "0 0 40px rgba(245, 158, 11, 0.4)";
+          setTimeout(() => {
+            frame.style.boxShadow = "";
+          }, 350);
+        }
+      }
+
+      // Smooth SVG Progress Ring Animation Loop (Runs independent of socket frequency)
+      function animateDwellRing() {
+        if (currentHoveredElement && dwellStartTime && !hasTriggered) {
+          const elapsed = performance.now() - dwellStartTime;
+          const progress = Math.min(elapsed / dwellDuration, 1.0);
+
+          // Update circular stroke dash offset
+          const circumference = 94.25;
+          const offset = circumference - (progress * circumference);
+          dwellRing.style.strokeDashoffset = offset;
+
+          if (progress >= 1.0) {
+            hasTriggered = true;
+            triggerClick(currentHoveredElement);
+          }
+        } else {
+          // Reset ring to empty
+          dwellRing.style.strokeDashoffset = 94.25;
+        }
+
+        requestAnimationFrame(animateDwellRing);
+      }
+
+      // Start the frame animation thread
+      requestAnimationFrame(animateDwellRing);
+
+      // WebSocket consumer channel
+      function connect() {
+        updateStatus("connecting");
+        const ws = new WebSocket("ws://127.0.0.1:8000/ws/consumer");
+
+        ws.onopen = () => {
+          updateStatus("waiting");
+          logTerminal("WebSocket client interface connected to FastAPI backend.", "sys");
+        };
+
+        ws.onmessage = (event) => {
+          const rawData = event.data;
+          lastMsg.textContent = rawData.length > 20 ? rawData.substring(0, 18) + "..." : rawData;
+          
+          try {
+            const data = JSON.parse(rawData);
+            if (data.type === "status") {
+              if (data.message === "consumer_connected") {
+                updateStatus("waiting");
+                return;
+              }
+              if (data.face_detected === false) {
+                updateStatus("waiting");
+                statusText.textContent = "Streamer connected, but no face detected.";
+                statusText.style.color = "var(--accent-red)";
+              } else if (data.face_detected === true && data.calibrated === false) {
+                updateStatus("calibrating", `Calibration in progress: ${data.step} of ${data.total}`);
+              }
+              return;
+            }
+            if (data.type === "gaze") {
+              updateStatus("active");
+              const rect = frame.getBoundingClientRect();
+              const x = Math.min(Math.max(data.x, 0), 1);
+              const y = Math.min(Math.max(data.y, 0), 1);
+              
+              // Shift tracking cursor coordinate
+              dot.style.left = `${x * rect.width}px`;
+              dot.style.top = `${y * rect.height}px`;
+
+              // Evaluate hover colliders
+              updateHoverState(x, y);
+            }
+          } catch (error) {
+            statusText.textContent = "Received malformed coordinate data";
+            statusText.style.color = "var(--accent-red)";
+          }
+        };
+
+        ws.onclose = () => {
+          updateStatus("closed");
+          logTerminal("WebSocket client interface disconnected. Reconnecting in 1.5s...", "sys");
+          setTimeout(connect, 1500);
+        };
+
+        ws.onerror = () => {
+          updateStatus("error", "WebSocket interface encountered a connection error.");
+        };
+      }
+
+      connect();
+    </script>
+  </body>
+</html>
