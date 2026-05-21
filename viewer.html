@@ -617,6 +617,13 @@
       let mediaState = false;
       let lockState = false;
 
+      // Gaze Stabilization Filter States (Adaptive EMA)
+      let filteredX = null;
+      let filteredY = null;
+      const alphaMin = 0.015; // Stronger noise rejection during static fixation (dead-zone effect)
+      const alphaMax = 0.95; // Ultra-fast response for rapid gaze changes (saccades)
+      const dThreshold = 0.12; // Expanded threshold to isolate micro-jitter and tremors
+
       // Web Audio Synthesizer Beeps
       function playBeep(type) {
         try {
@@ -685,6 +692,10 @@
       }
 
       function updateStatus(state, details) {
+        if (state !== "active") {
+          filteredX = null;
+          filteredY = null;
+        }
         if (state === "connecting") {
           statusDot.className = "status-dot connecting";
           statusDot.style.backgroundColor = "var(--accent-yellow)";
@@ -890,15 +901,32 @@
             if (data.type === "gaze") {
               updateStatus("active");
               const rect = frame.getBoundingClientRect();
-              const x = Math.min(Math.max(data.x, 0), 1);
-              const y = Math.min(Math.max(data.y, 0), 1);
+              const rawX = Math.min(Math.max(data.x, 0), 1);
+              const rawY = Math.min(Math.max(data.y, 0), 1);
               
-              // Shift tracking cursor coordinate
-              dot.style.left = `${x * rect.width}px`;
-              dot.style.top = `${y * rect.height}px`;
+              // Adaptive Gaze Smoothing Algorithm
+              if (filteredX === null || filteredY === null) {
+                filteredX = rawX;
+                filteredY = rawY;
+              } else {
+                const dx = rawX - filteredX;
+                const dy = rawY - filteredY;
+                const d = Math.sqrt(dx * dx + dy * dy);
+                
+                // Quartic (4th-power) velocity scaling for aggressive dead-zone filtering
+                const ratio = Math.min(d / dThreshold, 1.0);
+                const alpha = alphaMin + (alphaMax - alphaMin) * Math.pow(ratio, 4);
+                
+                filteredX = alpha * rawX + (1.0 - alpha) * filteredX;
+                filteredY = alpha * rawY + (1.0 - alpha) * filteredY;
+              }
 
-              // Evaluate hover colliders
-              updateHoverState(x, y);
+              // Shift tracking cursor coordinate
+              dot.style.left = `${filteredX * rect.width}px`;
+              dot.style.top = `${filteredY * rect.height}px`;
+
+              // Evaluate hover colliders with stabilized coordinates
+              updateHoverState(filteredX, filteredY);
             }
           } catch (error) {
             statusText.textContent = "Received malformed coordinate data";
