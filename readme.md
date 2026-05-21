@@ -39,6 +39,7 @@ Assistive technology is often prohibitively expensive (costing upwards of $1,000
 * **Asynchronous Multi-Threaded streaming:** Decoupled network and hardware operations to enable sub-30ms real-time transmission.
 * **Hands-free Gaze Interaction:** Animated circular SVG dwell indicators with integrated sci-fi sound feedback and scrolling live event logs.
 * **Quartic Adaptive Gaze Stabilization:** A mathematical 4th-power adaptive Exponential Moving Average (EMA) filter that isolates physiological micro-saccades and tremors during target fixation while retaining instant saccadic sweep responsiveness.
+* **Mathematical Head-Pose & Scale Invariance:** Normalizes raw iris coordinates relative to the outer/inner corners of both eye sockets and scales them by eye width. This eliminates tracking drift caused by head movements (translation/tilts) or changing webcam distances.
 
 ---
 
@@ -89,6 +90,7 @@ To deliver absolute real-time snappiness and eliminate communication lag, Drisht
 4. **Transition-Free Visual Snap:** Removed CSS transitions from the browser cursor `#dot` (`transition: none`). The dot snaps instantaneously to raw gaze coordinates as they arrive, matching native OS mouse behavior.
 5. **waitKey Delay Minimization:** OpenCV keyboard polling was optimized from `cv2.waitKey(5)` to `cv2.waitKey(1)` to save 4ms of blocking time per frame.
 6. **Quartic Adaptive Dead-Zone Filtering:** Combats natural high-frequency physiological eye-jitter (tremors) by applying a $4^{\text{th}}\text{-power}$ adaptive Exponential Moving Average (EMA) algorithm on the coordinate data. It locks the gaze cursor steady during static fixation ($\alpha_{\text{min}} = 0.015, d_{\text{thresh}} = 0.12$) and transitions to near-raw coordinates ($\alpha_{\text{max}} = 0.95$) during saccades for lag-free cursor tracking.
+7. **Relative Eye-Corner Displacement Vectors:** Gaze tracking is traditionally highly susceptible to head drift. We replaced absolute normalized camera coordinate tracking with relative displacement vectors anchored to eye corner landmarks ($L_{33}, L_{133}, R_{263}, R_{362}$). By dividing relative iris offset by Euclidean eye socket width, the raw coordinates sent to the calibration mapping are fully scale-invariant and translation-invariant.
 
 ---
 

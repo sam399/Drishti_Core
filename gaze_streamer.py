@@ -30,13 +30,43 @@ TARGET_SEND_HZ = 30
 INFER_WIDTH = 320
 
 
-def get_iris_center(face_landmarks):
-    left_iris_indices = [474, 475, 476, 477]
-    right_iris_indices = [469, 470, 471, 472]
-    indices = left_iris_indices + right_iris_indices
-    xs = [face_landmarks[i].x for i in indices]
-    ys = [face_landmarks[i].y for i in indices]
-    return float(np.mean(xs)), float(np.mean(ys))
+def get_relative_gaze_vector(face_landmarks):
+    if len(face_landmarks) < 478:
+        # Fallback to standard tracking if refined iris landmarks are missing
+        return 0.0, 0.0
+
+    # Left eye landmarks: outer (33), inner (133), iris (474, 475, 476, 477)
+    l_outer = face_landmarks[33]
+    l_inner = face_landmarks[133]
+    l_iris_indices = [474, 475, 476, 477]
+    
+    l_center_x = (l_outer.x + l_inner.x) / 2.0
+    l_center_y = (l_outer.y + l_inner.y) / 2.0
+    l_width = ((l_outer.x - l_inner.x) ** 2 + (l_outer.y - l_inner.y) ** 2) ** 0.5
+    
+    l_iris_x = float(np.mean([face_landmarks[i].x for i in l_iris_indices]))
+    l_iris_y = float(np.mean([face_landmarks[i].y for i in l_iris_indices]))
+    
+    l_off_x = (l_iris_x - l_center_x) / l_width if l_width > 0.0 else 0.0
+    l_off_y = (l_iris_y - l_center_y) / l_width if l_width > 0.0 else 0.0
+
+    # Right eye landmarks: outer (263), inner (362), iris (469, 470, 471, 472)
+    r_outer = face_landmarks[263]
+    r_inner = face_landmarks[362]
+    r_iris_indices = [469, 470, 471, 472]
+    
+    r_center_x = (r_outer.x + r_inner.x) / 2.0
+    r_center_y = (r_outer.y + r_inner.y) / 2.0
+    r_width = ((r_outer.x - r_inner.x) ** 2 + (r_outer.y - r_inner.y) ** 2) ** 0.5
+    
+    r_iris_x = float(np.mean([face_landmarks[i].x for i in r_iris_indices]))
+    r_iris_y = float(np.mean([face_landmarks[i].y for i in r_iris_indices]))
+    
+    r_off_x = (r_iris_x - r_center_x) / r_width if r_width > 0.0 else 0.0
+    r_off_y = (r_iris_y - r_center_y) / r_width if r_width > 0.0 else 0.0
+
+    # Average left and right relative gaze vectors
+    return float((l_off_x + r_off_x) / 2.0), float((l_off_y + r_off_y) / 2.0)
 
 
 def fit_affine(samples):
@@ -111,7 +141,7 @@ def _inference_worker(
 
         if face_detected:
             face_landmarks = result.face_landmarks[0]
-            iris_x, iris_y = get_iris_center(face_landmarks)
+            iris_x, iris_y = get_relative_gaze_vector(face_landmarks)
 
             if not state["calibrated"]:
                 target_x, target_y = CALIBRATION_POINTS[state["calibration_index"]]
@@ -250,7 +280,7 @@ def run(ws_url: str) -> None:
             frame_queue.put_nowait(rgb_small)
 
             with state_lock:
-                state = shared_state.copy()
+                state = copy.deepcopy(shared_state)
 
             if state["face_detected"]:
                 if state["calibrated"] and state["gaze_x"] is not None:
