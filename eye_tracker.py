@@ -32,19 +32,36 @@ HOLD_FRAMES = 20
 SAMPLES_PER_POINT = 15
 
 
-def get_relative_gaze_vector(face_landmarks):
+def get_relative_gaze_vector(face_landmarks, corner_history=None, alpha_corner=0.08, prev_gaze=None, alpha_gaze=0.35):
     if len(face_landmarks) < 478:
         # Fallback to standard tracking if refined iris landmarks are missing
-        return 0.0, 0.0
+        return (0.0, 0.0), prev_gaze
+
+    # Smoothed corner coordinates
+    smoothed = {}
+    corner_indices = [33, 133, 263, 362]
+    
+    for idx in corner_indices:
+        raw_pt = face_landmarks[idx]
+        if corner_history is not None and idx in corner_history:
+            prev_x, prev_y = corner_history[idx]
+            smooth_x = alpha_corner * raw_pt.x + (1.0 - alpha_corner) * prev_x
+            smooth_y = alpha_corner * raw_pt.y + (1.0 - alpha_corner) * prev_y
+        else:
+            smooth_x = raw_pt.x
+            smooth_y = raw_pt.y
+        if corner_history is not None:
+            corner_history[idx] = (smooth_x, smooth_y)
+        smoothed[idx] = (smooth_x, smooth_y)
 
     # Left eye landmarks: outer (33), inner (133), iris (474, 475, 476, 477)
-    l_outer = face_landmarks[33]
-    l_inner = face_landmarks[133]
+    l_outer_x, l_outer_y = smoothed[33]
+    l_inner_x, l_inner_y = smoothed[133]
     l_iris_indices = [474, 475, 476, 477]
     
-    l_center_x = (l_outer.x + l_inner.x) / 2.0
-    l_center_y = (l_outer.y + l_inner.y) / 2.0
-    l_width = ((l_outer.x - l_inner.x) ** 2 + (l_outer.y - l_inner.y) ** 2) ** 0.5
+    l_center_x = (l_outer_x + l_inner_x) / 2.0
+    l_center_y = (l_outer_y + l_inner_y) / 2.0
+    l_width = ((l_outer_x - l_inner_x) ** 2 + (l_outer_y - l_inner_y) ** 2) ** 0.5
     
     l_iris_x = float(np.mean([face_landmarks[i].x for i in l_iris_indices]))
     l_iris_y = float(np.mean([face_landmarks[i].y for i in l_iris_indices]))
@@ -53,13 +70,13 @@ def get_relative_gaze_vector(face_landmarks):
     l_off_y = (l_iris_y - l_center_y) / l_width if l_width > 0.0 else 0.0
 
     # Right eye landmarks: outer (263), inner (362), iris (469, 470, 471, 472)
-    r_outer = face_landmarks[263]
-    r_inner = face_landmarks[362]
+    r_outer_x, r_outer_y = smoothed[263]
+    r_inner_x, r_inner_y = smoothed[362]
     r_iris_indices = [469, 470, 471, 472]
     
-    r_center_x = (r_outer.x + r_inner.x) / 2.0
-    r_center_y = (r_outer.y + r_inner.y) / 2.0
-    r_width = ((r_outer.x - r_inner.x) ** 2 + (r_outer.y - r_inner.y) ** 2) ** 0.5
+    r_center_x = (r_outer_x + r_inner_x) / 2.0
+    r_center_y = (r_outer_y + r_inner_y) / 2.0
+    r_width = ((r_outer_x - r_inner_x) ** 2 + (r_outer_y - r_inner_y) ** 2) ** 0.5
     
     r_iris_x = float(np.mean([face_landmarks[i].x for i in r_iris_indices]))
     r_iris_y = float(np.mean([face_landmarks[i].y for i in r_iris_indices]))
@@ -68,7 +85,19 @@ def get_relative_gaze_vector(face_landmarks):
     r_off_y = (r_iris_y - r_center_y) / r_width if r_width > 0.0 else 0.0
 
     # Average left and right relative gaze vectors
-    return float((l_off_x + r_off_x) / 2.0), float((l_off_y + r_off_y) / 2.0)
+    raw_gaze_x = (l_off_x + r_off_x) / 2.0
+    raw_gaze_y = (l_off_y + r_off_y) / 2.0
+
+    # Gaze vector low pass smoothing
+    if prev_gaze is not None and prev_gaze[0] is not None and prev_gaze[1] is not None:
+        smooth_gaze_x = alpha_gaze * raw_gaze_x + (1.0 - alpha_gaze) * prev_gaze[0]
+        smooth_gaze_y = alpha_gaze * raw_gaze_y + (1.0 - alpha_gaze) * prev_gaze[1]
+    else:
+        smooth_gaze_x = raw_gaze_x
+        smooth_gaze_y = raw_gaze_y
+
+    new_gaze = (float(smooth_gaze_x), float(smooth_gaze_y))
+    return new_gaze, new_gaze
 
 
 def fit_affine(samples):
@@ -96,6 +125,8 @@ cap = cv2.VideoCapture(0)
 calibration_index, hold_count, current_samples, all_samples, calibrated, affine_x, affine_y = (
     reset_calibration()
 )
+corner_history = {}
+prev_gaze = [None, None]
 
 while cap.isOpened():
     success, frame = cap.read()
@@ -114,7 +145,15 @@ while cap.isOpened():
 
     if result.face_landmarks:
         face_landmarks = result.face_landmarks[0]
-        iris_x, iris_y = get_relative_gaze_vector(face_landmarks)
+        (iris_x, iris_y), _ = get_relative_gaze_vector(
+            face_landmarks,
+            corner_history=corner_history,
+            alpha_corner=0.08,
+            prev_gaze=prev_gaze,
+            alpha_gaze=0.35
+        )
+        prev_gaze[0] = iris_x
+        prev_gaze[1] = iris_y
 
         if not calibrated:
             target_x, target_y = CALIBRATION_POINTS[calibration_index]
@@ -163,6 +202,8 @@ while cap.isOpened():
             gaze_py = int(gaze_y * h)
             cv2.circle(frame, (gaze_px, gaze_py), 10, (0, 255, 255), -1)
     else:
+        corner_history.clear()
+        prev_gaze = [None, None]
         if not calibrated:
             hold_count = 0
             current_samples = []
@@ -194,6 +235,8 @@ while cap.isOpened():
         calibration_index, hold_count, current_samples, all_samples, calibrated, affine_x, affine_y = (
             reset_calibration()
         )
+        corner_history.clear()
+        prev_gaze = [None, None]
     # Press 'q' to exit
     if key == ord('q'):
         break
