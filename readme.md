@@ -34,6 +34,8 @@ Assistive technology is often prohibitively expensive (costing upwards of $1,000
 
 ## ✨ Key Features
 * **Hardware Agnostic Gaze Tracking:** Works on standard consumer webcams without requiring expensive infrared sensors.
+* **Three-Column Dashboard UI & Side Panels:** Utilizes screen margins to render a left Gaze Telemetry panel (real-time coordinates, dynamic alpha, hovered target) and a 2D Gaze Path canvas minimap (fading visual coordinates trail of last 15 points) alongside a right Quick-Speak presets panel for emergency Bengali voice synthesis.
+* **Avro-Style Phonetic QWERTY Layout:** A fully integrated phonetic typing system that transliterates English keyboard inputs to Bengali Unicode in real-time (e.g. `ami` -> `আমি`), featuring conjunct (যুক্তবর্ণ) conjoining, an active word-in-progress underline style, a gaze-interactive `Shift` key for capitalization, and layout switcher buttons.
 * **Ergonomic Bengali AAC Keyboard:** A high-contrast, phonon-frequency optimized virtual keyboard built into `viewer.html` featuring vowel, consonant, and dedicated tactile action rows (Backspace, Clear, Space, Speak) designed for ease of gaze targeting.
 * **Context-Aware Predictive NLP Engine:** A local JavaScript N-gram predictive text engine offering prefix autocomplete and next-word recommendations (bigrams) based on a Bengali text corpus, drastically reducing the physical effort needed to type.
 * **Four-Stage Ultra-Stabilized Gaze Precision Pipeline:** A premium multi-phase processing pipeline combining Python-side pre-filtering, boundary expansion, magnetic target snapping (Gaze Gravity), and a Quartic Adaptive EMA filter for lag-free, jitter-free precision.
@@ -162,8 +164,12 @@ To deliver absolute real-time snappiness and eliminate communication lag, Drisht
 ## 🧩 Current Status
 * **Core eye-tracking and calibration:** Implemented in `eye_tracker.py` using MediaPipe Tasks Face Landmarker, fully calibrated using relative eye corner offset vectors.
 * **Decoupled network streaming pipeline:** Fully established in `gaze_streamer.py` and `server.py` with asynchronous multi-threaded offloading and deepcopy safety.
-* **Hands-free Interactive Cyber-Dashboard:** Integrated into `viewer.html` containing a dual-tab layout (Smart Home + Message Board), a custom Bengali AAC virtual keyboard, local predictive N-gram text engine, text-to-speech voice synthesis, SVG circular loading rings, responsive glassmorphic cards, Web Audio feedback, and a scrolling live cyber-terminal log.
-
+* **Three-Column Cyber-Dashboard UI:** Fully integrated into `viewer.html` containing:
+  - Left panel: Telemetry indicators and HTML5 `<canvas>` Gaze Path minimap visualizer (last 15 points trail).
+  - Right panel: Urgent Quick-Speak preset cards (help, water, hungry, etc.) playing Bengali speech synthesis upon 1.0s dwell.
+  - Dual-layout virtual keyboard: Swaps between Phonetic QWERTY (Avro-style) and Direct Bangla vowel/consonant grids via gaze.
+  - Active word-in-progress visualizer (dashed cyan underline) and realtime autocomplete predictions.
+  - Cyber-terminal logs, Web Audio sound tones, and responsive `@media` query fallbacks.
 
 ---
 

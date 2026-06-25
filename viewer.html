@@ -46,7 +46,7 @@
 
       .app-container {
         width: 100%;
-        max-width: 1000px;
+        max-width: 1300px;
         padding: 24px;
         display: flex;
         flex-direction: column;
@@ -152,8 +152,8 @@
       .tab-navigation {
         position: absolute;
         top: 15px;
-        left: 24px;
-        right: 24px;
+        left: 290px;
+        right: 290px;
         display: flex;
         gap: 15px;
         z-index: 15;
@@ -199,8 +199,8 @@
       .panel-content {
         position: absolute;
         top: 80px;
-        left: 2.5%;
-        width: 95%;
+        left: 290px;
+        width: calc(100% - 580px);
         height: calc(100% - 96px);
         display: flex;
         flex-direction: column;
@@ -783,6 +783,213 @@
         from { opacity: 0.5; }
         to { opacity: 1; }
       }
+
+      /* Sidebar Panels Layout */
+      .side-panel {
+        background: rgba(17, 24, 39, 0.45);
+        border: 1.5px solid var(--border-color);
+        border-radius: 18px;
+        padding: 18px;
+        backdrop-filter: blur(12px);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        box-shadow: 
+          0 10px 15px -3px rgba(0, 0, 0, 0.3),
+          inset 0 1px 2px 0 rgba(255, 255, 255, 0.05);
+        box-sizing: border-box;
+      }
+
+      .left-panel {
+        position: absolute;
+        left: 24px;
+        top: 15px;
+        width: 250px;
+        height: calc(100% - 30px);
+        z-index: 10;
+      }
+
+      .right-panel {
+        position: absolute;
+        right: 24px;
+        top: 15px;
+        width: 250px;
+        height: calc(100% - 30px);
+        z-index: 10;
+      }
+
+      .panel-section-title {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        color: var(--accent-cyan);
+        text-transform: uppercase;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding-bottom: 6px;
+        margin: 0;
+        text-shadow: 0 0 10px rgba(0, 255, 213, 0.2);
+      }
+
+      /* Telemetry Grid */
+      .telemetry-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .telemetry-item {
+        background: rgba(15, 23, 42, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        border-radius: 10px;
+        padding: 8px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .telemetry-label {
+        font-size: 9px;
+        color: var(--text-sub);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .telemetry-value {
+        font-size: 13px;
+        font-weight: 600;
+        font-family: "JetBrains Mono", monospace;
+        color: #ffffff;
+      }
+
+      /* Gaze Minimap Canvas */
+      .minimap-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        margin-top: 4px;
+      }
+
+      .minimap-canvas {
+        background: rgba(3, 7, 18, 0.85);
+        border: 1px solid rgba(0, 255, 213, 0.15);
+        border-radius: 12px;
+        width: 212px;
+        height: 212px;
+        box-shadow: inset 0 0 12px rgba(0, 255, 213, 0.05);
+      }
+
+      /* Quick-Speak Preset Cards */
+      .preset-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        overflow-y: auto;
+        flex-grow: 1;
+      }
+
+      .preset-card {
+        background: rgba(15, 23, 42, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        border-radius: 12px;
+        padding: 10px 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        user-select: none;
+        box-sizing: border-box;
+      }
+
+      .preset-card.gaze-hover {
+        border-color: var(--accent-cyan);
+        background: rgba(0, 255, 213, 0.08);
+        box-shadow: 0 0 12px rgba(0, 255, 213, 0.15);
+        transform: translateY(-1px);
+      }
+
+      .preset-icon {
+        font-size: 18px;
+      }
+
+      .preset-text {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-main);
+      }
+
+      /* Keyboard Layout Selector */
+      .keyboard-layout-selector {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 8px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .layout-btn {
+        flex: 1;
+        background: rgba(15, 23, 42, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        padding: 8px 16px;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-sub);
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        backdrop-filter: blur(6px);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        user-select: none;
+        box-sizing: border-box;
+      }
+
+      .layout-btn.gaze-hover {
+        border-color: var(--accent-cyan);
+        background: rgba(0, 255, 213, 0.06);
+        color: #ffffff;
+        box-shadow: 0 0 10px rgba(0, 255, 213, 0.1);
+      }
+
+      .layout-btn.active-layout {
+        border-color: var(--accent-cyan);
+        background: rgba(0, 255, 213, 0.1);
+        color: var(--accent-cyan);
+        box-shadow: 0 0 15px rgba(0, 255, 213, 0.2), inset 0 0 6px rgba(0, 255, 213, 0.05);
+      }
+
+      /* Active Shift Indicator */
+      .key.active-shift {
+        border-color: var(--accent-cyan);
+        background: rgba(0, 255, 213, 0.15) !important;
+        color: var(--accent-cyan) !important;
+        box-shadow: 0 0 15px rgba(0, 255, 213, 0.25) !important;
+      }
+
+      /* Responsive Sidebar Fallback */
+      @media (max-width: 1200px) {
+        .side-panel {
+          display: none !important;
+        }
+        .tab-navigation {
+          left: 24px !important;
+          right: 24px !important;
+        }
+        .panel-content {
+          left: 2.5% !important;
+          width: 95% !important;
+        }
+        .app-container {
+          max-width: 1000px !important;
+        }
+      }
     </style>
   </head>
   <body>
@@ -817,6 +1024,60 @@
 
         <div class="frame" id="frame">
           <div class="grid-lines"></div>
+
+          <!-- Left Sidebar Panel -->
+          <div class="side-panel left-panel">
+            <h3 class="panel-section-title">Gaze Telemetry</h3>
+            <div class="telemetry-grid">
+              <div class="telemetry-item">
+                <span class="telemetry-label">Gaze Coordinates</span>
+                <span class="telemetry-value" id="telemetry-gaze">X: 0.00 | Y: 0.00</span>
+              </div>
+              <div class="telemetry-item">
+                <span class="telemetry-label">Smoothing Alpha</span>
+                <span class="telemetry-value" id="telemetry-alpha">0.0700</span>
+              </div>
+              <div class="telemetry-item">
+                <span class="telemetry-label">Hovered Target</span>
+                <span class="telemetry-value" id="telemetry-target">NONE</span>
+              </div>
+            </div>
+            <h3 class="panel-section-title" style="margin-top: 10px;">Gaze Path Minimap</h3>
+            <div class="minimap-container">
+              <canvas class="minimap-canvas" id="minimap-canvas" width="212" height="212"></canvas>
+            </div>
+          </div>
+
+          <!-- Right Sidebar Panel -->
+          <div class="side-panel right-panel">
+            <h3 class="panel-section-title">Quick Speak Presets</h3>
+            <div class="preset-grid">
+              <div class="preset-card gaze-interactive" data-action="quick-speak" data-value="সাহায্য করুন">
+                <span class="preset-icon">🚨</span>
+                <span class="preset-text">সাহায্য করুন</span>
+              </div>
+              <div class="preset-card gaze-interactive" data-action="quick-speak" data-value="পানি লাগবে">
+                <span class="preset-icon">🥛</span>
+                <span class="preset-text">পানি লাগবে</span>
+              </div>
+              <div class="preset-card gaze-interactive" data-action="quick-speak" data-value="ক্ষুধা লেগেছে">
+                <span class="preset-icon">🍲</span>
+                <span class="preset-text">ক্ষুধা লেগেছে</span>
+              </div>
+              <div class="preset-card gaze-interactive" data-action="quick-speak" data-value="বাথরুমে যাবো">
+                <span class="preset-icon">🚽</span>
+                <span class="preset-text">বাথরুমে যাবো</span>
+              </div>
+              <div class="preset-card gaze-interactive" data-action="quick-speak" data-value="আমি ঠিক আছি">
+                <span class="preset-icon">👍</span>
+                <span class="preset-text">আমি ঠিক আছি</span>
+              </div>
+              <div class="preset-card gaze-interactive" data-action="quick-speak" data-value="ধন্যবাদ">
+                <span class="preset-icon">🙏</span>
+                <span class="preset-text">ধন্যবাদ</span>
+              </div>
+            </div>
+          </div>
 
           <!-- Tab Navigation -->
           <div class="tab-navigation">
@@ -871,48 +1132,102 @@
               <div class="prediction-chip gaze-interactive" data-action="predict" id="pred-2">আছি</div>
             </div>
 
+            <!-- Keyboard Layout Selector -->
+            <div class="keyboard-layout-selector">
+              <div class="layout-btn active-layout gaze-interactive" id="layout-phonetic" data-action="layout-phonetic">
+                <span>🔤</span> ফোনেটিক (Phonetic)
+              </div>
+              <div class="layout-btn gaze-interactive" id="layout-direct" data-action="layout-direct">
+                <span>⌨️</span> সরাসরি বাংলা (Direct Bangla)
+              </div>
+            </div>
+
             <!-- Virtual Keyboard -->
             <div class="keyboard-grid">
-              <!-- Row 1: Vowels & Modifiers -->
-              <div class="keyboard-row">
-                <div class="key gaze-interactive" data-action="key" data-value="অ">অ</div>
-                <div class="key gaze-interactive" data-action="key" data-value="আ">আ</div>
-                <div class="key gaze-interactive" data-action="key" data-value="ই">ই</div>
-                <div class="key gaze-interactive" data-action="key" data-value="উ">উ</div>
-                <div class="key gaze-interactive" data-action="key" data-value="এ">এ</div>
-                <div class="key gaze-interactive" data-action="key" data-value="ও">ও</div>
-                <div class="key gaze-interactive modifier-key" data-action="key" data-value="া">া</div>
-                <div class="key gaze-interactive modifier-key" data-action="key" data-value="ি">ি</div>
-                <div class="key gaze-interactive modifier-key" data-action="key" data-value="ী">ী</div>
-                <div class="key gaze-interactive modifier-key" data-action="key" data-value="ু">ু</div>
-                <div class="key gaze-interactive modifier-key" data-action="key" data-value="ে">ে</div>
-                <div class="key gaze-interactive modifier-key" data-action="key" data-value="ো">ো</div>
+              <!-- Bangla Keyboard Layout -->
+              <div id="keyboard-bangla-layout" style="display: none; width: 100%; display: flex; flex-direction: column; gap: 8px;">
+                <!-- Row 1: Vowels & Modifiers -->
+                <div class="keyboard-row">
+                  <div class="key gaze-interactive" data-action="key" data-value="অ">অ</div>
+                  <div class="key gaze-interactive" data-action="key" data-value="আ">আ</div>
+                  <div class="key gaze-interactive" data-action="key" data-value="ই">ই</div>
+                  <div class="key gaze-interactive" data-action="key" data-value="উ">উ</div>
+                  <div class="key gaze-interactive" data-action="key" data-value="এ">এ</div>
+                  <div class="key gaze-interactive" data-action="key" data-value="ও">ও</div>
+                  <div class="key gaze-interactive modifier-key" data-action="key" data-value="া">া</div>
+                  <div class="key gaze-interactive modifier-key" data-action="key" data-value="ি">ি</div>
+                  <div class="key gaze-interactive modifier-key" data-action="key" data-value="ী">ী</div>
+                  <div class="key gaze-interactive modifier-key" data-action="key" data-value="ু">ু</div>
+                  <div class="key gaze-interactive modifier-key" data-action="key" data-value="ে">ে</div>
+                  <div class="key gaze-interactive modifier-key" data-action="key" data-value="ো">ো</div>
+                </div>
+                <!-- Row 2: Consonants Part 1 -->
+                <div class="keyboard-row">
+                  <div class="key gaze-interactive" data-action="key" data-value="ক">ক</div>
+                  <div class="key gaze-interactive" data-action="key" data-value="গ">গ</div>
+                  <div class="key gaze-interactive" data-action="key" data-value="চ">চ</div>
+                  <div class="key gaze-interactive" data-action="key" data-value="জ">জ</div>
+                  <div class="key gaze-interactive" data-action="key" data-value="ত">ত</div>
+                  <div class="key gaze-interactive" data-action="key" data-value="দ">দ</div>
+                  <div class="key gaze-interactive" data-action="key" data-value="ন">ন</div>
+                  <div class="key gaze-interactive" data-action="key" data-value="প">প</div>
+                  <div class="key gaze-interactive" data-action="key" data-value="ব">ব</div>
+                </div>
+                <!-- Row 3: Consonants Part 2 -->
+                <div class="keyboard-row">
+                  <div class="key gaze-interactive" data-action="key" data-value="ম">ম</div>
+                  <div class="key gaze-interactive" data-action="key" data-value="য">য</div>
+                  <div class="key gaze-interactive" data-action="key" data-value="র">র</div>
+                  <div class="key gaze-interactive" data-action="key" data-value="ল">ল</div>
+                  <div class="key gaze-interactive" data-action="key" data-value="শ">শ</div>
+                  <div class="key gaze-interactive" data-action="key" data-value="স">স</div>
+                  <div class="key gaze-interactive" data-action="key" data-value="হ">হ</div>
+                  <div class="key gaze-interactive" data-action="key" data-value="ড়">ড়</div>
+                  <div class="key gaze-interactive" data-action="key" data-value="য়">য়</div>
+                </div>
               </div>
-              <!-- Row 2: Consonants Part 1 -->
-              <div class="keyboard-row">
-                <div class="key gaze-interactive" data-action="key" data-value="ক">ক</div>
-                <div class="key gaze-interactive" data-action="key" data-value="গ">গ</div>
-                <div class="key gaze-interactive" data-action="key" data-value="চ">চ</div>
-                <div class="key gaze-interactive" data-action="key" data-value="জ">জ</div>
-                <div class="key gaze-interactive" data-action="key" data-value="ত">ত</div>
-                <div class="key gaze-interactive" data-action="key" data-value="দ">দ</div>
-                <div class="key gaze-interactive" data-action="key" data-value="ন">ন</div>
-                <div class="key gaze-interactive" data-action="key" data-value="প">প</div>
-                <div class="key gaze-interactive" data-action="key" data-value="ব">ব</div>
+
+              <!-- Phonetic QWERTY Layout -->
+              <div id="keyboard-phonetic-layout" style="width: 100%; display: flex; flex-direction: column; gap: 8px;">
+                <!-- Row 1 -->
+                <div class="keyboard-row">
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="q">q</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="w">w</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="e">e</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="r">r</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="t">t</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="y">y</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="u">u</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="i">i</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="o">o</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="p">p</div>
+                </div>
+                <!-- Row 2 -->
+                <div class="keyboard-row">
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="a">a</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="s">s</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="d">d</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="f">f</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="g">g</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="h">h</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="j">j</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="k">k</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="l">l</div>
+                </div>
+                <!-- Row 3 -->
+                <div class="keyboard-row">
+                  <div class="key gaze-interactive action-key" id="key-shift" data-action="shift" style="flex: 1.5">Shift</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="z">z</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="x">x</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="c">c</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="v">v</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="b">b</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="n">n</div>
+                  <div class="key gaze-interactive" data-action="eng-key" data-value="m">m</div>
+                </div>
               </div>
-              <!-- Row 3: Consonants Part 2 -->
-              <div class="keyboard-row">
-                <div class="key gaze-interactive" data-action="key" data-value="ম">ম</div>
-                <div class="key gaze-interactive" data-action="key" data-value="য">য</div>
-                <div class="key gaze-interactive" data-action="key" data-value="র">র</div>
-                <div class="key gaze-interactive" data-action="key" data-value="ল">ল</div>
-                <div class="key gaze-interactive" data-action="key" data-value="শ">শ</div>
-                <div class="key gaze-interactive" data-action="key" data-value="স">স</div>
-                <div class="key gaze-interactive" data-action="key" data-value="হ">হ</div>
-                <div class="key gaze-interactive" data-action="key" data-value="ড়">ড়</div>
-                <div class="key gaze-interactive" data-action="key" data-value="য়">য়</div>
-              </div>
-              <!-- Row 4: Action Keys -->
+
+              <!-- Row 4: Action Keys (Shared) -->
               <div class="keyboard-row">
                 <div class="key gaze-interactive action-key clear-key" data-action="clear" style="flex: 1.5">মুছুন</div>
                 <div class="key gaze-interactive action-key backspace-key" data-action="backspace" style="flex: 1.5">ব্যাকস্পেস</div>
@@ -975,6 +1290,93 @@
       let hasTriggered = false;
       let audioCtx = null;
 
+      // Minimap Canvas variables
+      const minimapCanvas = document.getElementById("minimap-canvas");
+      const minimapCtx = minimapCanvas ? minimapCanvas.getContext("2d") : null;
+      let gazeHistory = []; // Array of {x, y} coordinates
+
+      // Render 2D Gaze Path Minimap
+      function drawMinimap() {
+        if (!minimapCanvas || !minimapCtx) return;
+        const width = minimapCanvas.width;
+        const height = minimapCanvas.height;
+
+        // Clear canvas
+        minimapCtx.clearRect(0, 0, width, height);
+
+        // Draw grid background
+        minimapCtx.strokeStyle = "rgba(0, 255, 213, 0.08)";
+        minimapCtx.lineWidth = 1;
+        const gridCount = 5;
+        for (let i = 1; i < gridCount; i++) {
+          const x = (width / gridCount) * i;
+          const y = (height / gridCount) * i;
+          
+          // Vertical line
+          minimapCtx.beginPath();
+          minimapCtx.moveTo(x, 0);
+          minimapCtx.lineTo(x, height);
+          minimapCtx.stroke();
+
+          // Horizontal line
+          minimapCtx.beginPath();
+          minimapCtx.moveTo(0, y);
+          minimapCtx.lineTo(width, y);
+          minimapCtx.stroke();
+        }
+
+        // Draw gaze path/trail
+        if (gazeHistory.length > 1) {
+          minimapCtx.beginPath();
+          minimapCtx.lineWidth = 2.5;
+          
+          for (let i = 0; i < gazeHistory.length; i++) {
+            const pt = gazeHistory[i];
+            const px = pt.x * width;
+            const py = pt.y * height;
+            
+            if (i === 0) {
+              minimapCtx.moveTo(px, py);
+            } else {
+              minimapCtx.lineTo(px, py);
+            }
+          }
+          
+          // Fading cyan trail
+          minimapCtx.strokeStyle = "rgba(0, 255, 213, 0.4)";
+          minimapCtx.stroke();
+          
+          // Draw dots along the trail with fading opacity
+          for (let i = 0; i < gazeHistory.length - 1; i++) {
+            const pt = gazeHistory[i];
+            const opacity = ((i + 1) / gazeHistory.length) * 0.5;
+            minimapCtx.fillStyle = `rgba(0, 255, 213, ${opacity})`;
+            minimapCtx.beginPath();
+            minimapCtx.arc(pt.x * width, pt.y * height, 3, 0, 2 * Math.PI);
+            minimapCtx.fill();
+          }
+        }
+
+        // Draw current/latest gaze coordinate
+        if (gazeHistory.length > 0) {
+          const latest = gazeHistory[gazeHistory.length - 1];
+          const lx = latest.x * width;
+          const ly = latest.y * height;
+
+          // Outer glowing ring
+          minimapCtx.fillStyle = "rgba(0, 255, 213, 0.25)";
+          minimapCtx.beginPath();
+          minimapCtx.arc(lx, ly, 8, 0, 2 * Math.PI);
+          minimapCtx.fill();
+
+          // Inner solid dot
+          minimapCtx.fillStyle = "#00ffd5";
+          minimapCtx.beginPath();
+          minimapCtx.arc(lx, ly, 4, 0, 2 * Math.PI);
+          minimapCtx.fill();
+        }
+      }
+
       // Click Action States
       let lightState = false;
       let mediaState = false;
@@ -982,6 +1384,153 @@
 
       // Bengali virtual keyboard typing buffer
       let typedText = "";
+      let englishInputBuffer = ""; // Phonetic typing buffer
+      let shiftActive = false; // Shift key state for QWERTY phonetic keyboard
+
+      // Avro-style Phonetic Transliteration Maps
+      const vowelMap = {
+        "a": "া",
+        "i": "ি",
+        "I": "ী",
+        "u": "ু",
+        "U": "ূ",
+        "e": "ে",
+        "O": "ো",
+        "oi": "ৈ", "OI": "ৈ",
+        "ou": "ৌ", "OU": "ৌ",
+        "RI": "ৃ", "rri": "ৃ",
+        "o": "" // Inherent vowel (no modifier symbol)
+      };
+
+      const independentVowelMap = {
+        "a": "আ",
+        "i": "ই",
+        "I": "ঈ",
+        "u": "উ",
+        "U": "ঊ",
+        "e": "এ",
+        "O": "ও",
+        "oi": "ঐ", "OI": "ঐ",
+        "ou": "ঔ", "OU": "ঔ",
+        "RI": "ঋ", "rri": "ঋ",
+        "o": "অ",
+        "A": "অ"
+      };
+
+      const consonantMap = {
+        "khy": "ক্ষ",
+        "kh": "খ", "k": "ক",
+        "gh": "ঘ", "g": "গ",
+        "Ng": "ঙ", "ng": "ং",
+        "ch": "ছ", "c": "চ",
+        "jh": "ঝ", "j": "জ",
+        "Th": "ঠ", "T": "ট",
+        "Dh": "ঢ", "D": "ড",
+        "th": "থ", "t": "ত",
+        "dh": "ধ", "d": "দ",
+        "ph": "ফ", "p": "প",
+        "bh": "ভ", "b": "ব",
+        "sh": "শ", "Sh": "ষ", "S": "ষ", "s": "স",
+        "Rh": "ঢ়", "R": "ড়",
+        "y": "য়", "z": "য",
+        "r": "র", "l": "ল", "m": "ম", "n": "ন", "h": "হ",
+        "N": "ণ", "w": "ও", "x": "ক্স"
+      };
+
+      const nonConjoining = ["ng", "Ng", "G", "to"];
+
+      // Lexer/Parser for Avro-style Phonetic Transliteration
+      function transliterateWord(eng) {
+        if (!eng) return "";
+        
+        let result = "";
+        let i = 0;
+        let lastWasConsonant = false;
+        let lastConsonantChar = "";
+        
+        const consonants = [
+          "khy", "kh", "gh", "Ng", "ng", "ch", "jh", "Th", "Dh", "th", "dh", 
+          "ph", "bh", "sh", "Sh", "Rh", "k", "g", "c", "j", "T", "D", 
+          "t", "d", "p", "b", "s", "S", "R", "y", "z", "r", "l", "m", 
+          "n", "h", "N", "w", "x"
+        ];
+        
+        const vowels = ["OI", "oi", "OU", "ou", "rri", "RI", "a", "i", "I", "u", "U", "e", "o", "O", "A"];
+        
+        while (i < eng.length) {
+          // 1. Try to match a consonant
+          let matchedConsonant = "";
+          for (const c of consonants) {
+            if (eng.startsWith(c, i)) {
+              matchedConsonant = c;
+              break;
+            }
+          }
+          
+          if (matchedConsonant) {
+            const bnConsonant = consonantMap[matchedConsonant];
+            
+            if (lastWasConsonant) {
+              // If the last token was also a consonant, we insert a Hasant to form a conjunct
+              // Except for non-conjoining final letters and specific phala behaviors
+              if (nonConjoining.includes(lastConsonantChar)) {
+                result += bnConsonant;
+              } else if (matchedConsonant === "r") {
+                result += "্" + bnConsonant; // Ra-phala
+              } else if (matchedConsonant === "y") {
+                result += "্য"; // Ya-phala
+              } else if (lastConsonantChar === "r") {
+                result += "্" + bnConsonant; // Reph-like conjoining
+              } else {
+                result += "্" + bnConsonant; // Default conjunct Hasant
+              }
+            } else {
+              result += bnConsonant;
+            }
+            
+            lastWasConsonant = true;
+            lastConsonantChar = matchedConsonant;
+            i += matchedConsonant.length;
+            continue;
+          }
+          
+          // 2. Try to match a vowel
+          let matchedVowel = "";
+          for (const v of vowels) {
+            if (eng.startsWith(v, i)) {
+              matchedVowel = v;
+              break;
+            }
+          }
+          
+          if (matchedVowel) {
+            if (lastWasConsonant) {
+              const bnModifier = vowelMap[matchedVowel];
+              if (bnModifier !== undefined) {
+                result += bnModifier;
+              }
+            } else {
+              const bnIndependent = independentVowelMap[matchedVowel];
+              if (bnIndependent) {
+                result += bnIndependent;
+              }
+            }
+            
+            lastWasConsonant = false;
+            lastConsonantChar = "";
+            i += matchedVowel.length;
+            continue;
+          }
+          
+          // 3. Fallback: copy character as-is
+          result += eng[i];
+          lastWasConsonant = false;
+          lastConsonantChar = "";
+          i++;
+        }
+        
+        return result;
+      }
 
       // Offline NLP Predictive Engine Data
       const BENGALI_VOCAB = [
@@ -1087,6 +1636,8 @@
         if (state !== "active") {
           filteredX = null;
           filteredY = null;
+          gazeHistory = [];
+          drawMinimap();
         }
         if (state === "connecting") {
           statusDot.className = "status-dot connecting";
@@ -1158,35 +1709,55 @@
 
           let name = "Interactive Element";
           const cardTitle = currentHoveredElement.querySelector(".card-title");
+          const presetText = currentHoveredElement.querySelector(".preset-text");
           if (cardTitle) {
             name = cardTitle.textContent;
+          } else if (presetText) {
+            name = `Preset [${presetText.textContent.trim()}]`;
           } else if (currentHoveredElement.classList.contains("key")) {
             name = `Key [${currentHoveredElement.textContent.trim()}]`;
           } else if (currentHoveredElement.classList.contains("prediction-chip")) {
             name = `Prediction [${currentHoveredElement.textContent.trim()}]`;
           } else if (currentHoveredElement.classList.contains("tab-btn")) {
             name = `Tab [${currentHoveredElement.textContent.trim()}]`;
+          } else if (currentHoveredElement.classList.contains("layout-btn")) {
+            name = `Layout [${currentHoveredElement.textContent.trim()}]`;
           }
           logTerminal(`Focus locked: ${name}`, 'gaze');
+          
+          const telemetryTarget = document.getElementById("telemetry-target");
+          if (telemetryTarget) {
+            telemetryTarget.textContent = name;
+          }
         } else {
           if (currentHoveredElement) {
             currentHoveredElement.classList.remove("gaze-hover");
             let name = "Interactive Element";
             const cardTitle = currentHoveredElement.querySelector(".card-title");
+            const presetText = currentHoveredElement.querySelector(".preset-text");
             if (cardTitle) {
               name = cardTitle.textContent;
+            } else if (presetText) {
+              name = `Preset [${presetText.textContent.trim()}]`;
             } else if (currentHoveredElement.classList.contains("key")) {
               name = `Key [${currentHoveredElement.textContent.trim()}]`;
             } else if (currentHoveredElement.classList.contains("prediction-chip")) {
               name = `Prediction [${currentHoveredElement.textContent.trim()}]`;
             } else if (currentHoveredElement.classList.contains("tab-btn")) {
               name = `Tab [${currentHoveredElement.textContent.trim()}]`;
+            } else if (currentHoveredElement.classList.contains("layout-btn")) {
+              name = `Layout [${currentHoveredElement.textContent.trim()}]`;
             }
             logTerminal(`Focus lost: ${name}`, 'gaze');
           }
           currentHoveredElement = null;
           dwellStartTime = null;
           hasTriggered = false;
+          
+          const telemetryTarget = document.getElementById("telemetry-target");
+          if (telemetryTarget) {
+            telemetryTarget.textContent = "NONE";
+          }
         }
       }
 
@@ -1256,34 +1827,79 @@
         } else if (action === "tab-keyboard") {
           switchTab("keyboard");
         } else if (action === "key") {
+          if (englishInputBuffer.length > 0) {
+            typedText += transliterateWord(englishInputBuffer);
+            englishInputBuffer = "";
+          }
           const val = element.getAttribute("data-value");
           typedText += val;
           updateTextDisplay();
           logTerminal(`Typed character: ${val}`, "evt");
+        } else if (action === "eng-key") {
+          let val = element.getAttribute("data-value");
+          if (shiftActive) {
+            val = val.toUpperCase();
+            toggleShift();
+          }
+          englishInputBuffer += val;
+          updateTextDisplay();
+          logTerminal(`Phonetic typed: ${val} (Buffer: ${englishInputBuffer})`, "evt");
+        } else if (action === "shift") {
+          toggleShift();
+        } else if (action === "layout-phonetic") {
+          switchLayout("phonetic");
+        } else if (action === "layout-direct") {
+          switchLayout("direct");
         } else if (action === "space") {
-          if (typedText.length > 0 && typedText[typedText.length - 1] !== " ") {
-            typedText += " ";
+          if (englishInputBuffer.length > 0) {
+            typedText += transliterateWord(englishInputBuffer) + " ";
+            englishInputBuffer = "";
             updateTextDisplay();
-            logTerminal("Typed: [SPACE]", "evt");
+            logTerminal("Committed phonetic word via [SPACE]", "evt");
+          } else {
+            if (typedText.length > 0 && typedText[typedText.length - 1] !== " ") {
+              typedText += " ";
+              updateTextDisplay();
+              logTerminal("Typed: [SPACE]", "evt");
+            }
           }
         } else if (action === "backspace") {
-          if (typedText.length > 0) {
-            const removed = typedText[typedText.length - 1];
-            typedText = typedText.substring(0, typedText.length - 1);
+          if (englishInputBuffer.length > 0) {
+            const removed = englishInputBuffer[englishInputBuffer.length - 1];
+            englishInputBuffer = englishInputBuffer.slice(0, -1);
             updateTextDisplay();
-            logTerminal(`Removed character: ${removed}`, "evt");
+            logTerminal(`Removed phonetic character: ${removed}`, "evt");
+          } else {
+            if (typedText.length > 0) {
+              const removed = typedText[typedText.length - 1];
+              typedText = typedText.substring(0, typedText.length - 1);
+              updateTextDisplay();
+              logTerminal(`Removed character: ${removed}`, "evt");
+            }
           }
         } else if (action === "clear") {
           typedText = "";
+          englishInputBuffer = "";
           updateTextDisplay();
-          logTerminal("Cleared text buffer", "sys");
+          logTerminal("Cleared text buffers", "sys");
         } else if (action === "speak") {
+          if (englishInputBuffer.length > 0) {
+            typedText += transliterateWord(englishInputBuffer);
+            englishInputBuffer = "";
+            updateTextDisplay();
+          }
           speakTypedText();
         } else if (action === "predict") {
           const word = element.textContent;
           if (word && word !== "---") {
             selectPrediction(word);
           }
+        } else if (action === "quick-speak") {
+          const val = element.getAttribute("data-value");
+          typedText = val;
+          updateTextDisplay();
+          logTerminal(`Quick Speak Trigger: "${val}"`, "evt");
+          speakTypedText();
         }
       }
 
@@ -1312,6 +1928,50 @@
 
       // Start the frame animation thread
       requestAnimationFrame(animateDwellRing);
+
+      // Toggle case on QWERTY keys
+      function toggleShift() {
+        shiftActive = !shiftActive;
+        const shiftKey = document.getElementById("key-shift");
+        if (shiftActive) {
+          shiftKey.classList.add("active-shift");
+        } else {
+          shiftKey.classList.remove("active-shift");
+        }
+        
+        const keys = document.querySelectorAll("#keyboard-phonetic-layout .key[data-action='eng-key']");
+        keys.forEach(k => {
+          const val = k.getAttribute("data-value");
+          k.textContent = shiftActive ? val.toUpperCase() : val.toLowerCase();
+        });
+      }
+
+      // Switch virtual keyboard layout
+      function switchLayout(mode) {
+        const layoutPhonetic = document.getElementById("keyboard-phonetic-layout");
+        const layoutBangla = document.getElementById("keyboard-bangla-layout");
+        const btnPhonetic = document.getElementById("layout-phonetic");
+        const btnDirect = document.getElementById("layout-direct");
+
+        if (mode === "phonetic") {
+          layoutPhonetic.style.display = "flex";
+          layoutBangla.style.display = "none";
+          btnPhonetic.classList.add("active-layout");
+          btnDirect.classList.remove("active-layout");
+          logTerminal("Switched layout to: Phonetic (Avro-style)", "sys");
+        } else if (mode === "direct") {
+          if (englishInputBuffer.length > 0) {
+            typedText += transliterateWord(englishInputBuffer);
+            englishInputBuffer = "";
+            updateTextDisplay();
+          }
+          layoutPhonetic.style.display = "none";
+          layoutBangla.style.display = "flex";
+          btnPhonetic.classList.remove("active-layout");
+          btnDirect.classList.add("active-layout");
+          logTerminal("Switched layout to: Direct Bangla", "sys");
+        }
+      }
 
       // Switch Between Panels
       function switchTab(tabName) {
@@ -1343,17 +2003,25 @@
       // Update Text display and trigger prediction
       function updateTextDisplay() {
         const textDisplay = document.getElementById("keyboard-text-display");
-        textDisplay.textContent = typedText;
+        if (englishInputBuffer.length > 0) {
+          const transWord = transliterateWord(englishInputBuffer);
+          textDisplay.innerHTML = `${typedText}<span class="word-in-progress" style="border-bottom: 2px dashed var(--accent-cyan); color: #00ffd5;">${transWord}</span>`;
+        } else {
+          textDisplay.textContent = typedText;
+        }
         updatePredictionBar();
       }
 
       // Offline NLP Predictive Engine
       function updatePredictionBar() {
-        const text = typedText;
-        
-        // Find the active word (everything after the last space)
-        const spaceIndex = text.lastIndexOf(" ");
-        const activeWord = spaceIndex === -1 ? text : text.substring(spaceIndex + 1);
+        let activeWord = "";
+        if (englishInputBuffer.length > 0) {
+          activeWord = transliterateWord(englishInputBuffer);
+        } else {
+          const text = typedText;
+          const spaceIndex = text.lastIndexOf(" ");
+          activeWord = spaceIndex === -1 ? text : text.substring(spaceIndex + 1);
+        }
         
         let predictions = [];
         
@@ -1363,7 +2031,7 @@
           logTerminal(`Prefix matching for [${activeWord}]: found ${predictions.length} matches`, "sys");
         } else {
           // 2. Bigram next-word suggestion
-          const trimmed = text.trim();
+          const trimmed = typedText.trim();
           if (trimmed.length > 0) {
             const words = trimmed.split(" ");
             const lastWord = words[words.length - 1];
@@ -1406,14 +2074,16 @@
 
       // Selection of predicted word
       function selectPrediction(word) {
-        const words = typedText.split(" ");
-        if (words.length > 0 && typedText[typedText.length - 1] !== " ") {
-          words[words.length - 1] = word;
-          typedText = words.join(" ") + " ";
+        if (englishInputBuffer.length > 0) {
+          englishInputBuffer = "";
+        }
+        const words = typedText.trim().split(" ");
+        if (typedText.endsWith(" ") || typedText.length === 0) {
+          typedText = (typedText.trim() + " " + word).trim() + " ";
         } else {
-          // If ends with space or empty
-          if (typedText.length === 0 || typedText[typedText.length - 1] === " ") {
-            typedText += word + " ";
+          if (words.length > 0) {
+            words[words.length - 1] = word;
+            typedText = words.join(" ") + " ";
           } else {
             typedText = word + " ";
           }
@@ -1536,6 +2206,7 @@
               }
 
               // Adaptive Gaze Smoothing Algorithm
+              let currentAlpha = alphaMax;
               if (filteredX === null || filteredY === null) {
                 filteredX = targetX;
                 filteredY = targetY;
@@ -1546,15 +2217,32 @@
                 
                 // Quartic velocity scaling for highly stabilized, slow dead-zone transition
                 const ratio = Math.min(d / dThreshold, 1.0);
-                const alpha = alphaMin + (alphaMax - alphaMin) * Math.pow(ratio, 4);
+                currentAlpha = alphaMin + (alphaMax - alphaMin) * Math.pow(ratio, 4);
                 
-                filteredX = alpha * targetX + (1.0 - alpha) * filteredX;
-                filteredY = alpha * targetY + (1.0 - alpha) * filteredY;
+                filteredX = currentAlpha * targetX + (1.0 - currentAlpha) * filteredX;
+                filteredY = currentAlpha * targetY + (1.0 - currentAlpha) * filteredY;
               }
 
               // Shift tracking cursor coordinate
               dot.style.left = `${filteredX * rect.width}px`;
               dot.style.top = `${filteredY * rect.height}px`;
+
+              // Update telemetry values
+              const displayGaze = document.getElementById("telemetry-gaze");
+              if (displayGaze) {
+                displayGaze.textContent = `X: ${data.x.toFixed(2)} | Y: ${data.y.toFixed(2)}`;
+              }
+              const displayAlpha = document.getElementById("telemetry-alpha");
+              if (displayAlpha) {
+                displayAlpha.textContent = currentAlpha.toFixed(4);
+              }
+
+              // Push coordinate history for the 2D visualizer minimap
+              gazeHistory.push({ x: filteredX, y: filteredY });
+              if (gazeHistory.length > 15) {
+                gazeHistory.shift();
+              }
+              drawMinimap();
 
               // Evaluate hover colliders with stabilized coordinates
               updateHoverState(filteredX, filteredY);
