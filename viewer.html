@@ -973,6 +973,54 @@
         box-shadow: 0 0 15px rgba(0, 255, 213, 0.25) !important;
       }
 
+      /* Semantic Suggestion Bar & Chips */
+      .semantic-bar {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scrollbar-width: none;
+        box-sizing: border-box;
+      }
+
+      .semantic-bar::-webkit-scrollbar {
+        display: none;
+      }
+
+      .semantic-chip {
+        flex: 1;
+        background: rgba(88, 28, 135, 0.45);
+        border: 1px solid rgba(139, 92, 246, 0.18);
+        border-radius: 10px;
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #e9d5ff;
+        cursor: pointer;
+        backdrop-filter: blur(6px);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        user-select: none;
+        white-space: nowrap;
+        box-sizing: border-box;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .semantic-chip.gaze-hover {
+        border-color: #a78bfa;
+        background: rgba(139, 92, 246, 0.15);
+        color: #ffffff;
+        box-shadow: 0 0 12px rgba(139, 92, 246, 0.25);
+        transform: translateY(-1px);
+      }
+
       /* Responsive Sidebar Fallback */
       @media (max-width: 1200px) {
         .side-panel {
@@ -1130,6 +1178,13 @@
               <div class="prediction-chip gaze-interactive" data-action="predict" id="pred-0">আমি</div>
               <div class="prediction-chip gaze-interactive" data-action="predict" id="pred-1">ভালো</div>
               <div class="prediction-chip gaze-interactive" data-action="predict" id="pred-2">আছি</div>
+            </div>
+
+            <!-- Semantic Suggestion Bar -->
+            <div class="semantic-bar" id="semantic-bar">
+              <div class="semantic-chip gaze-interactive" data-action="semantic-speak" data-value="" id="sem-0" style="visibility: hidden;">---</div>
+              <div class="semantic-chip gaze-interactive" data-action="semantic-speak" data-value="" id="sem-1" style="visibility: hidden;">---</div>
+              <div class="semantic-chip gaze-interactive" data-action="semantic-speak" data-value="" id="sem-2" style="visibility: hidden;">---</div>
             </div>
 
             <!-- Keyboard Layout Selector -->
@@ -1386,6 +1441,7 @@
       let typedText = "";
       let englishInputBuffer = ""; // Phonetic typing buffer
       let shiftActive = false; // Shift key state for QWERTY phonetic keyboard
+      let semanticDebounceTimeout = null;
 
       // Avro-style Phonetic Transliteration Maps
       const vowelMap = {
@@ -1718,6 +1774,8 @@
             name = `Key [${currentHoveredElement.textContent.trim()}]`;
           } else if (currentHoveredElement.classList.contains("prediction-chip")) {
             name = `Prediction [${currentHoveredElement.textContent.trim()}]`;
+          } else if (currentHoveredElement.classList.contains("semantic-chip")) {
+            name = `Semantic [${currentHoveredElement.textContent.trim()}]`;
           } else if (currentHoveredElement.classList.contains("tab-btn")) {
             name = `Tab [${currentHoveredElement.textContent.trim()}]`;
           } else if (currentHoveredElement.classList.contains("layout-btn")) {
@@ -1743,6 +1801,8 @@
               name = `Key [${currentHoveredElement.textContent.trim()}]`;
             } else if (currentHoveredElement.classList.contains("prediction-chip")) {
               name = `Prediction [${currentHoveredElement.textContent.trim()}]`;
+            } else if (currentHoveredElement.classList.contains("semantic-chip")) {
+              name = `Semantic [${currentHoveredElement.textContent.trim()}]`;
             } else if (currentHoveredElement.classList.contains("tab-btn")) {
               name = `Tab [${currentHoveredElement.textContent.trim()}]`;
             } else if (currentHoveredElement.classList.contains("layout-btn")) {
@@ -1900,6 +1960,15 @@
           updateTextDisplay();
           logTerminal(`Quick Speak Trigger: "${val}"`, "evt");
           speakTypedText();
+        } else if (action === "semantic-speak") {
+          const val = element.getAttribute("data-value");
+          if (val) {
+            typedText = val;
+            englishInputBuffer = "";
+            updateTextDisplay();
+            logTerminal(`Semantic Commit & Speak: "${val}"`, "evt");
+            speakTypedText();
+          }
         }
       }
 
@@ -2003,13 +2072,85 @@
       // Update Text display and trigger prediction
       function updateTextDisplay() {
         const textDisplay = document.getElementById("keyboard-text-display");
+        let currentFullQuery = "";
         if (englishInputBuffer.length > 0) {
           const transWord = transliterateWord(englishInputBuffer);
           textDisplay.innerHTML = `${typedText}<span class="word-in-progress" style="border-bottom: 2px dashed var(--accent-cyan); color: #00ffd5;">${transWord}</span>`;
+          currentFullQuery = typedText + transWord;
         } else {
           textDisplay.textContent = typedText;
+          currentFullQuery = typedText;
         }
         updatePredictionBar();
+        fetchSemanticSuggestions(currentFullQuery);
+      }
+
+      // Fetch semantic suggestions from FastAPI backend
+      function fetchSemanticSuggestions(query) {
+        if (semanticDebounceTimeout) {
+          clearTimeout(semanticDebounceTimeout);
+        }
+
+        if (!query || query.trim().length === 0) {
+          clearSemanticSuggestions();
+          return;
+        }
+
+        semanticDebounceTimeout = setTimeout(() => {
+          fetch("http://127.0.0.1:8000/api/semantic-complete", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ text: query })
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data && data.suggestions) {
+              displaySemanticSuggestions(data.suggestions);
+            } else {
+              clearSemanticSuggestions();
+            }
+          })
+          .catch(err => {
+            console.error("Error fetching semantic suggestions:", err);
+            logTerminal(`Semantic suggestions error: ${err.message}`, "sys");
+            clearSemanticSuggestions();
+          });
+        }, 180);
+      }
+
+      function displaySemanticSuggestions(suggestions) {
+        for (let i = 0; i < 3; i++) {
+          const chip = document.getElementById(`sem-${i}`);
+          if (chip) {
+            if (suggestions && suggestions[i]) {
+              chip.textContent = suggestions[i];
+              chip.setAttribute("data-value", suggestions[i]);
+              chip.style.visibility = "visible";
+            } else {
+              chip.textContent = "---";
+              chip.setAttribute("data-value", "");
+              chip.style.visibility = "hidden";
+            }
+          }
+        }
+      }
+
+      function clearSemanticSuggestions() {
+        for (let i = 0; i < 3; i++) {
+          const chip = document.getElementById(`sem-${i}`);
+          if (chip) {
+            chip.textContent = "---";
+            chip.setAttribute("data-value", "");
+            chip.style.visibility = "hidden";
+          }
+        }
       }
 
       // Offline NLP Predictive Engine

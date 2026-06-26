@@ -36,6 +36,7 @@ Assistive technology is often prohibitively expensive (costing upwards of $1,000
 * **Hardware Agnostic Gaze Tracking:** Works on standard consumer webcams without requiring expensive infrared sensors.
 * **Three-Column Dashboard UI & Side Panels:** Utilizes screen margins to render a left Gaze Telemetry panel (real-time coordinates, dynamic alpha, hovered target) and a 2D Gaze Path canvas minimap (fading visual coordinates trail of last 15 points) alongside a right Quick-Speak presets panel for emergency Bengali voice synthesis.
 * **Avro-Style Phonetic QWERTY Layout:** A fully integrated phonetic typing system that transliterates English keyboard inputs to Bengali Unicode in real-time (e.g. `ami` -> `আমি`), featuring conjunct (যুক্তবর্ণ) conjoining, an active word-in-progress underline style, a gaze-interactive `Shift` key for capitalization, and layout switcher buttons.
+* **Semantic Language Augmentation:** Integrates a local `LaBSE` (Language-Agnostic BERT Sentence Embedding) dense encoder with an in-memory `Qdrant` vector database client on the backend to perform context-aware semantic sentence completions (e.g., `ami b` -> `আমি ভালো আছি`). Full-sentence intents are displayed in a dedicated deep purple glassmorphic "Semantic Bar" below the predictive chips, and are committed and spoken instantly via TTS upon a 1.0s dwell.
 * **Ergonomic Bengali AAC Keyboard:** A high-contrast, phonon-frequency optimized virtual keyboard built into `viewer.html` featuring vowel, consonant, and dedicated tactile action rows (Backspace, Clear, Space, Speak) designed for ease of gaze targeting.
 * **Context-Aware Predictive NLP Engine:** A local JavaScript N-gram predictive text engine offering prefix autocomplete and next-word recommendations (bigrams) based on a Bengali text corpus, drastically reducing the physical effort needed to type.
 * **Four-Stage Ultra-Stabilized Gaze Precision Pipeline:** A premium multi-phase processing pipeline combining Python-side pre-filtering, boundary expansion, magnetic target snapping (Gaze Gravity), and a Quartic Adaptive EMA filter for lag-free, jitter-free precision.
@@ -48,9 +49,9 @@ Assistive technology is often prohibitively expensive (costing upwards of $1,000
 
 ## 🛠️ Tech Stack
 * **Frontend:** HTML5, Vanilla CSS3 (Glassmorphism design, hardware-accelerated slide-up panels), JavaScript (ES6+), Web Audio API, Web Speech API (Bengali TTS)
-* **Backend:** Python 3.12, FastAPI, WebSockets (Uvicorn HTTP server)
+* **Backend:** Python 3.12, FastAPI, WebSockets (Uvicorn HTTP server), `sentence-transformers` (`LaBSE` dense embeddings model), `qdrant-client` (in-memory mode vector DB)
 * **Computer Vision:** OpenCV, Google MediaPipe (Face Landmarker & Iris Landmark Detection)
-* **Machine Learning / NLP:** Local JavaScript Bengali N-gram predictive engine trained on Bengali corpus associations
+* **Machine Learning / NLP:** Local `LaBSE` dense encoder coupled with an in-memory `Qdrant` vector database client on the backend; local JavaScript Bengali N-gram predictive engine trained on Bengali corpus associations on the frontend
 
 ---
 
@@ -164,10 +165,12 @@ To deliver absolute real-time snappiness and eliminate communication lag, Drisht
 ## 🧩 Current Status
 * **Core eye-tracking and calibration:** Implemented in `eye_tracker.py` using MediaPipe Tasks Face Landmarker, fully calibrated using relative eye corner offset vectors.
 * **Decoupled network streaming pipeline:** Fully established in `gaze_streamer.py` and `server.py` with asynchronous multi-threaded offloading and deepcopy safety.
+* **Semantic Language Augmentation:** Fully integrated in the backend (`server.py`) and frontend (`viewer.html`). Uses a local `LaBSE` dense encoder and in-memory `Qdrant` vector database client to provide real-time context-aware Bengali sentence suggestions from a conversational/emergency corpus.
 * **Three-Column Cyber-Dashboard UI:** Fully integrated into `viewer.html` containing:
   - Left panel: Telemetry indicators and HTML5 `<canvas>` Gaze Path minimap visualizer (last 15 points trail).
   - Right panel: Urgent Quick-Speak preset cards (help, water, hungry, etc.) playing Bengali speech synthesis upon 1.0s dwell.
   - Dual-layout virtual keyboard: Swaps between Phonetic QWERTY (Avro-style) and Direct Bangla vowel/consonant grids via gaze.
+  - Dedicated "Semantic Bar" (deep purple glassmorphic style) rendering top sentence suggestions, committing and speaking the suggestion via TTS instantly upon 1.0s dwell.
   - Active word-in-progress visualizer (dashed cyan underline) and realtime autocomplete predictions.
   - Cyber-terminal logs, Web Audio sound tones, and responsive `@media` query fallbacks.
 

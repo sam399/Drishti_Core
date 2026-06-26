@@ -4,3 +4,5 @@ numpy
 opencv-python
 uvicorn
 websockets
+sentence-transformers
+qdrant-client
