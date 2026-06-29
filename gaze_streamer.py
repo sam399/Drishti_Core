@@ -19,9 +19,13 @@ MODEL_PATH = os.path.join("models", "face_landmarker.task")
 # Calibration settings
 CALIBRATION_POINTS = [
     (0.1, 0.1),
+    (0.5, 0.1),
     (0.9, 0.1),
+    (0.1, 0.5),
     (0.5, 0.5),
+    (0.9, 0.5),
     (0.1, 0.9),
+    (0.5, 0.9),
     (0.9, 0.9),
 ]
 HOLD_FRAMES = 20
@@ -142,6 +146,13 @@ def create_face_landmarker():
     return vision.FaceLandmarker.create_from_options(options)
 
 
+class MappedLandmark:
+    def __init__(self, x, y, z=0.0):
+        self.x = x
+        self.y = y
+        self.z = z
+
+
 def _inference_worker(
     frame_queue: queue.Queue,
     shared_state: dict,
@@ -153,6 +164,9 @@ def _inference_worker(
     state = reset_calibration_state()
     corner_history = {}
     prev_gaze = [None, None]
+    
+    # State variable for face tracking (ymin, xmin, ymax, xmax) in normalized coordinates
+    last_face_bbox = None
 
     while not stop_event.is_set():
         try:
@@ -164,55 +178,150 @@ def _inference_worker(
             state = reset_calibration_state()
             corner_history.clear()
             prev_gaze = [None, None]
+            last_face_bbox = None
             reset_event.clear()
 
-        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
-        result = face_landmarker.detect(mp_image)
-        face_detected = bool(result.face_landmarks)
+        H, W, _ = rgb_frame.shape
+
+        # Adaptive crop width based on capture resolution (higher res webcams run higher res crops)
+        infer_w = 480 if W >= 1280 else 320
+
+        face_detected = False
+        face_landmarks = None
+
+        if last_face_bbox is None:
+            # Face Search Mode: Run detection on a downscaled version of the full-frame
+            scale = 320.0 / W
+            infer_h = int(H * scale)
+            resized = cv2.resize(rgb_frame, (320, infer_h))
+            
+            mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=resized)
+            result = face_landmarker.detect(mp_image)
+            
+            if result.face_landmarks:
+                face_detected = True
+                raw_landmarks = result.face_landmarks[0]
+                
+                # Convert back to list of MappedLandmarks (since aspect ratios match, raw normalized is full-frame normalized)
+                face_landmarks = [MappedLandmark(lm.x, lm.y, lm.z) for lm in raw_landmarks]
+                
+                # Calculate new bounding box
+                xs = [lm.x for lm in face_landmarks]
+                ys = [lm.y for lm in face_landmarks]
+                last_face_bbox = (min(ys), min(xs), max(ys), max(xs))
+        else:
+            # Face Tracking Mode: Crop and detect on cropped face ROI
+            ymin, xmin, ymax, xmax = last_face_bbox
+            w_bbox = xmax - xmin
+            h_bbox = ymax - ymin
+            
+            # Pad the bounding box (25% on each side) to allow head movement
+            pad_x = w_bbox * 0.25
+            pad_y = h_bbox * 0.25
+            xmin_pad = max(0.0, xmin - pad_x)
+            xmax_pad = min(1.0, xmax + pad_x)
+            ymin_pad = max(0.0, ymin - pad_y)
+            ymax_pad = min(1.0, ymax + pad_y)
+            
+            # Crop box in pixels
+            left = int(xmin_pad * W)
+            right = int(xmax_pad * W)
+            top = int(ymin_pad * H)
+            bottom = int(ymax_pad * H)
+            
+            if right - left > 10 and bottom - top > 10:
+                cropped = rgb_frame[top:bottom, left:right]
+                # Resize cropped face to adaptive inference size
+                cropped_resized = cv2.resize(cropped, (infer_w, infer_w))
+                
+                mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=cropped_resized)
+                result = face_landmarker.detect(mp_image)
+                
+                if result.face_landmarks:
+                    face_detected = True
+                    cropped_landmarks = result.face_landmarks[0]
+                    
+                    # Remap landmarks from crop-local space back to full-frame space
+                    face_landmarks = []
+                    for lm in cropped_landmarks:
+                        mapped_x = xmin_pad + lm.x * (xmax_pad - xmin_pad)
+                        mapped_y = ymin_pad + lm.y * (ymax_pad - ymin_pad)
+                        face_landmarks.append(MappedLandmark(mapped_x, mapped_y, lm.z))
+                    
+                    # Recompute bounding box in full-frame coordinates for tracking lock
+                    xs = [lm.x for lm in face_landmarks]
+                    ys = [lm.y for lm in face_landmarks]
+                    last_face_bbox = (min(ys), min(xs), max(ys), max(xs))
+                else:
+                    # Face lost in crop region, reset tracking
+                    last_face_bbox = None
+            else:
+                last_face_bbox = None
 
         state["face_detected"] = face_detected
 
-        if face_detected:
-            face_landmarks = result.face_landmarks[0]
+        if face_detected and face_landmarks:
+            # Calculate EAR (Eye Aspect Ratio) for blink detection
+            try:
+                l_ver = ((face_landmarks[159].x - face_landmarks[145].x) ** 2 + 
+                         (face_landmarks[159].y - face_landmarks[145].y) ** 2) ** 0.5
+                l_hor = ((face_landmarks[33].x - face_landmarks[133].x) ** 2 + 
+                         (face_landmarks[33].y - face_landmarks[133].y) ** 2) ** 0.5
+                ear_left = l_ver / l_hor if l_hor > 0 else 0.0
+
+                r_ver = ((face_landmarks[386].x - face_landmarks[374].x) ** 2 + 
+                         (face_landmarks[386].y - face_landmarks[374].y) ** 2) ** 0.5
+                r_hor = ((face_landmarks[263].x - face_landmarks[362].x) ** 2 + 
+                         (face_landmarks[263].y - face_landmarks[362].y) ** 2) ** 0.5
+                ear_right = r_ver / r_hor if r_hor > 0 else 0.0
+
+                ear = (ear_left + ear_right) / 2.0
+                blink_detected = ear < 0.14
+            except Exception:
+                blink_detected = False
+
+            state["blink_detected"] = blink_detected
+
             (iris_x, iris_y), _ = get_relative_gaze_vector(
                 face_landmarks,
                 corner_history=corner_history,
-                alpha_corner=0.08,
+                alpha_corner=0.065,
                 prev_gaze=prev_gaze,
-                alpha_gaze=0.09
+                alpha_gaze=0.075
             )
             prev_gaze[0] = iris_x
             prev_gaze[1] = iris_y
 
-            if not state["calibrated"]:
-                target_x, target_y = CALIBRATION_POINTS[state["calibration_index"]]
-                if state["hold_count"] < HOLD_FRAMES:
-                    state["hold_count"] += 1
-                else:
-                    state["current_samples"].append((iris_x, iris_y))
-                    if len(state["current_samples"]) >= SAMPLES_PER_POINT:
-                        mean_x = float(
-                            np.mean([s[0] for s in state["current_samples"]])
-                        )
-                        mean_y = float(
-                            np.mean([s[1] for s in state["current_samples"]])
-                        )
-                        state["all_samples"].append((mean_x, mean_y, target_x, target_y))
-                        state["current_samples"] = []
-                        state["hold_count"] = 0
-                        state["calibration_index"] += 1
-
-                        if state["calibration_index"] >= len(CALIBRATION_POINTS):
-                            state["affine_x"], state["affine_y"] = fit_affine(
-                                state["all_samples"]
+            if not blink_detected:
+                if not state["calibrated"]:
+                    target_x, target_y = CALIBRATION_POINTS[state["calibration_index"]]
+                    if state["hold_count"] < HOLD_FRAMES:
+                        state["hold_count"] += 1
+                    else:
+                        state["current_samples"].append((iris_x, iris_y))
+                        if len(state["current_samples"]) >= SAMPLES_PER_POINT:
+                            mean_x = float(
+                                np.mean([s[0] for s in state["current_samples"]])
                             )
-                            state["calibrated"] = True
-            else:
-                gaze_x, gaze_y = apply_affine(
-                    state["affine_x"], state["affine_y"], iris_x, iris_y
-                )
-                state["gaze_x"] = gaze_x
-                state["gaze_y"] = gaze_y
+                            mean_y = float(
+                                np.mean([s[1] for s in state["current_samples"]])
+                            )
+                            state["all_samples"].append((mean_x, mean_y, target_x, target_y))
+                            state["current_samples"] = []
+                            state["hold_count"] = 0
+                            state["calibration_index"] += 1
+
+                            if state["calibration_index"] >= len(CALIBRATION_POINTS):
+                                state["affine_x"], state["affine_y"] = fit_affine(
+                                    state["all_samples"]
+                                )
+                                state["calibrated"] = True
+                else:
+                    gaze_x, gaze_y = apply_affine(
+                        state["affine_x"], state["affine_y"], iris_x, iris_y
+                    )
+                    state["gaze_x"] = gaze_x
+                    state["gaze_y"] = gaze_y
         else:
             state["gaze_x"] = None
             state["gaze_y"] = None
@@ -269,6 +378,8 @@ def _ws_sender_worker(
 
 def run(ws_url: str) -> None:
     cap = cv2.VideoCapture(0)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
     frame_queue: queue.Queue = queue.Queue(maxsize=1)
     ws_queue: queue.Queue = queue.Queue(maxsize=2)
     state_lock = threading.Lock()
@@ -310,17 +421,14 @@ def run(ws_url: str) -> None:
             frame = cv2.flip(frame, 1)
 
             h, w, _ = frame.shape
-            scale = INFER_WIDTH / float(w)
-            infer_h = int(h * scale)
-            resized = cv2.resize(frame, (INFER_WIDTH, infer_h))
-            rgb_small = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
+            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             if frame_queue.full():
                 try:
                     frame_queue.get_nowait()
                 except queue.Empty:
                     pass
-            frame_queue.put_nowait(rgb_small)
+            frame_queue.put_nowait(rgb_frame)
 
             with state_lock:
                 state = copy.deepcopy(shared_state)
@@ -386,6 +494,7 @@ def run(ws_url: str) -> None:
                         "type": "gaze",
                         "x": state["gaze_x"],
                         "y": state["gaze_y"],
+                        "blink": state.get("blink_detected", False),
                     }
                 else:
                     safe_index = min(

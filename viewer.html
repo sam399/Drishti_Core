@@ -1400,7 +1400,11 @@
       // State Trackers
       let currentHoveredElement = null;
       let dwellStartTime = null;
-      let dwellDuration = 1000; // 1.0s dwell duration
+      let dwellDuration = 1000; // current active dwell duration
+      const BASE_DWELL_DURATION = 1000;
+      const MIN_DWELL_DURATION = 600;
+      const DWELL_ACCEL_STEP = 75;
+      let consecutiveCorrectKeys = 0;
       let hasTriggered = false;
       let audioCtx = null;
 
@@ -1677,9 +1681,11 @@
       // Gaze Stabilization Filter States (Adaptive EMA)
       let filteredX = null;
       let filteredY = null;
-      const alphaMin = 0.003;  // Absolute rock-solid target fixation stability (was 0.005)
-      const alphaMax = 0.07;   // Extremely slow, calm, and predictable glide (was 0.10)
-      const dThreshold = 0.28; // Broad dead-zone to absorb large involuntary micro-movements (was 0.25)
+      let calibrationOffsetX = 0.0;
+      let calibrationOffsetY = 0.0;
+      const alphaMin = 0.012;  // Reduced by 20% for calmer target lock (was 0.015)
+      const alphaMax = 0.18;   // Reduced by ~18% for smoother sweeps (was 0.22)
+      const dThreshold = 0.15; // Increased for a larger dead-zone to absorb tremors (was 0.12)
 
       // Web Audio Synthesizer Beeps
       function playBeep(type) {
@@ -1925,6 +1931,35 @@
       function triggerClick(element) {
         playBeep('click');
         const action = element.getAttribute("data-action");
+
+        // Gaze Drift Recalibration Adjustment
+        if (filteredX !== null && filteredY !== null) {
+          const rect = frame.getBoundingClientRect();
+          const elemRect = element.getBoundingClientRect();
+          const elemCenterX = (elemRect.left + elemRect.width / 2 - rect.left) / rect.width;
+          const elemCenterY = (elemRect.top + elemRect.height / 2 - rect.top) / rect.height;
+
+          const errX = elemCenterX - filteredX;
+          const errY = elemCenterY - filteredY;
+          
+          // Slow continuous learning rate (8% adjustment per click)
+          const learningRate = 0.08;
+          calibrationOffsetX = Math.min(Math.max(calibrationOffsetX + errX * learningRate, -0.15), 0.15);
+          calibrationOffsetY = Math.min(Math.max(calibrationOffsetY + errY * learningRate, -0.15), 0.15);
+          
+          logTerminal(`[DRIFT RECALIBRATION] Shifted offset. X: ${calibrationOffsetX.toFixed(3)} | Y: ${calibrationOffsetY.toFixed(3)}`, 'gaze');
+        }
+
+        // Predictive Dwell Acceleration Adaptation
+        if (action === "key" || action === "eng-key" || action === "space" || action === "predict" || action === "semantic-speak") {
+          consecutiveCorrectKeys += 1;
+          dwellDuration = Math.max(BASE_DWELL_DURATION - consecutiveCorrectKeys * DWELL_ACCEL_STEP, MIN_DWELL_DURATION);
+          logTerminal(`[DWELL ACCELERATION] Streak: ${consecutiveCorrectKeys} | Dwell speed: ${dwellDuration}ms`, 'gaze');
+        } else if (action === "backspace") {
+          consecutiveCorrectKeys = 0;
+          dwellDuration = BASE_DWELL_DURATION;
+          logTerminal(`[DWELL ACCELERATION] Typo corrected. Dwell speed reset to 1000ms`, 'gaze');
+        }
 
         // UI flash confirmation ripple
         element.classList.add("gaze-click-flash");
@@ -2427,6 +2462,10 @@
           try {
             const data = JSON.parse(rawData);
             if (data.type === "status") {
+              if (data.calibrated === false) {
+                calibrationOffsetX = 0.0;
+                calibrationOffsetY = 0.0;
+              }
               if (data.message === "consumer_connected") {
                 updateStatus("waiting");
                 return;
@@ -2441,10 +2480,14 @@
               return;
             }
             if (data.type === "gaze") {
+              if (data.blink === true) {
+                // Ignore gaze updates during blinks to prevent screen jumps
+                return;
+              }
               updateStatus("active");
               const rect = frame.getBoundingClientRect();
-              const rawX = Math.min(Math.max(data.x, 0), 1);
-              const rawY = Math.min(Math.max(data.y, 0), 1);
+              const rawX = Math.min(Math.max(data.x + calibrationOffsetX, 0), 1);
+              const rawY = Math.min(Math.max(data.y + calibrationOffsetY, 0), 1);
               
               // Apply boundary-expansion (Sensitivity Multiplier)
               // Expands the coordinates outward from center to make reaching outer borders effortless
