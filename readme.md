@@ -62,23 +62,37 @@ Drishti relies on a fully decoupled, multi-threaded communication topology to of
 ```mermaid
 flowchart TD
     subgraph streamer_client ["gaze_streamer.py Client"]
-        A["Webcam Feed"] -->|Frames| B["Main Video Thread"]
-        B -->|Resized 320px Frame| C["MediaPipe Inference Thread"]
-        C -->|Gaze Vector Coordinates| B
-        B -->|Thread-Safe Queue| D["Asyncio Executor Thread Pool"]
-        D -->|WS Transport| E["WebSocket Producer"]
+        A["Webcam Feed"]
+        B["Main Video Thread"]
+        C["MediaPipe Inference Thread"]
+        D["Asyncio Executor Thread Pool"]
+        E["WebSocket Producer"]
+
+        A -->|"Frames"| B
+        B -->|"Resized 320px Frame"| C
+        C -->|"Gaze Vector Coordinates"| B
+        B -->|"Thread-Safe Queue"| D
+        D -->|"WS Transport"| E
     end
 
     subgraph fastapi_backend ["server.py Server"]
-        E -->|Gaze Stream| F["Producer WS Endpoint"]
-        F -->|Async Broadcast Task| G["Consumer WS Endpoint"]
+        F["Producer WS Endpoint"]
+        G["Consumer WS Endpoint"]
+
+        E -->|"Gaze Stream"| F
+        F -->|"Async Broadcast Task"| G
     end
 
     subgraph browser_client ["viewer.html Dashboard"]
-        G -->|Low Latency Event Stream| H["Webpage Consumer WS"]
-        H -->|Four-Stage Stabilized Pipeline| I["Native Bounding-Box Detector + Gaze Gravity"]
-        I -->|1.0s Dwell Lock| J["Web Audio Confirmation Beeps & Speech"]
-        I -->|Trigger State Change| K["Cyber Dashboard & Actions Log"]
+        H["Webpage Consumer WS"]
+        I["Native Bounding-Box Detector + Gaze Gravity"]
+        J["Web Audio Confirmation Beeps & Speech"]
+        K["Cyber Dashboard & Actions Log"]
+
+        G -->|"Low Latency Event Stream"| H
+        H -->|"Four-Stage Stabilized Pipeline"| I
+        I -->|"1.0s Dwell Lock"| J
+        I -->|"Trigger State Change"| K
     end
 ```
 
