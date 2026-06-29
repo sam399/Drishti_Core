@@ -1021,6 +1021,58 @@
         transform: translateY(-1px);
       }
 
+      /* Spatial Foveated Prediction Ribbon & Chips */
+      .foveated-ribbon {
+        position: absolute;
+        display: flex;
+        gap: 6px;
+        z-index: 1000;
+        pointer-events: none;
+        opacity: 0;
+        transform: translate(-50%, 10px);
+        transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        box-sizing: border-box;
+      }
+
+      .foveated-ribbon.active {
+        opacity: 1;
+        transform: translate(-50%, 0);
+        pointer-events: auto;
+      }
+
+      .foveated-chip {
+        background: rgba(88, 28, 135, 0.85); /* Darker purple glassmorphism for legibility */
+        border: 1px solid rgba(167, 139, 250, 0.35);
+        border-radius: 8px;
+        padding: 5px 10px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #ffffff;
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        user-select: none;
+        white-space: nowrap;
+        box-sizing: border-box;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 50px;
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .foveated-chip.gaze-hover {
+        border-color: #c084fc;
+        background: rgba(147, 51, 234, 0.85);
+        color: #ffffff;
+        box-shadow: 0 0 14px rgba(167, 139, 250, 0.5);
+        transform: scale(1.05);
+      }
+
       /* Responsive Sidebar Fallback */
       @media (max-width: 1200px) {
         .side-panel {
@@ -1292,6 +1344,13 @@
             </div>
           </div>
 
+          <!-- Floating Foveated Prediction Ribbon -->
+          <div class="foveated-ribbon" id="foveated-prediction-ribbon">
+            <div class="foveated-chip gaze-interactive" data-action="semantic-speak" data-value="" id="fov-sem-0" style="display: none;">---</div>
+            <div class="foveated-chip gaze-interactive" data-action="semantic-speak" data-value="" id="fov-sem-1" style="display: none;">---</div>
+            <div class="foveated-chip gaze-interactive" data-action="semantic-speak" data-value="" id="fov-sem-2" style="display: none;">---</div>
+          </div>
+
           <!-- Cursor with SVG Dwell Progress Ring -->
           <div class="dot" id="dot" style="left: 50%; top: 50%">
             <svg class="dwell-svg" width="36" height="36" viewBox="0 0 36 36">
@@ -1442,6 +1501,7 @@
       let englishInputBuffer = ""; // Phonetic typing buffer
       let shiftActive = false; // Shift key state for QWERTY phonetic keyboard
       let semanticDebounceTimeout = null;
+      let activeFoveatedAnchor = null;
 
       // Avro-style Phonetic Transliteration Maps
       const vowelMap = {
@@ -1747,6 +1807,42 @@
         const targetElement = document.elementFromPoint(clientX, clientY);
         const interactive = targetElement ? targetElement.closest('.gaze-interactive') : null;
 
+        // Foveated Ribbon Positioning & Lock Logic
+        const ribbon = document.getElementById("foveated-prediction-ribbon");
+        if (interactive) {
+          const isFovChip = interactive.classList.contains("foveated-chip") || interactive.id === "foveated-prediction-ribbon";
+          
+          if (interactive.classList.contains("key")) {
+            activeFoveatedAnchor = interactive;
+            const hoverRect = activeFoveatedAnchor.getBoundingClientRect();
+            const frameRect = frame.getBoundingClientRect();
+            const xOffset = hoverRect.left + hoverRect.width / 2 - frameRect.left;
+            const yOffset = hoverRect.top - frameRect.top - 55;
+            
+            if (ribbon) {
+              ribbon.style.left = `${xOffset}px`;
+              ribbon.style.top = `${yOffset}px`;
+              ribbon.classList.add("active");
+            }
+          } else if (isFovChip) {
+            // Keep active and anchored at activeFoveatedAnchor
+            if (ribbon && activeFoveatedAnchor) {
+              ribbon.classList.add("active");
+            }
+          } else {
+            // Hovered some other interactive element
+            if (ribbon) {
+              ribbon.classList.remove("active");
+            }
+            activeFoveatedAnchor = null;
+          }
+        } else {
+          if (ribbon) {
+            ribbon.classList.remove("active");
+          }
+          activeFoveatedAnchor = null;
+        }
+
         if (interactive) {
           if (currentHoveredElement === interactive) {
             // Still hovering same item
@@ -1776,6 +1872,8 @@
             name = `Prediction [${currentHoveredElement.textContent.trim()}]`;
           } else if (currentHoveredElement.classList.contains("semantic-chip")) {
             name = `Semantic [${currentHoveredElement.textContent.trim()}]`;
+          } else if (currentHoveredElement.classList.contains("foveated-chip")) {
+            name = `Foveated Suggestion [${currentHoveredElement.textContent.trim()}]`;
           } else if (currentHoveredElement.classList.contains("tab-btn")) {
             name = `Tab [${currentHoveredElement.textContent.trim()}]`;
           } else if (currentHoveredElement.classList.contains("layout-btn")) {
@@ -1803,6 +1901,8 @@
               name = `Prediction [${currentHoveredElement.textContent.trim()}]`;
             } else if (currentHoveredElement.classList.contains("semantic-chip")) {
               name = `Semantic [${currentHoveredElement.textContent.trim()}]`;
+            } else if (currentHoveredElement.classList.contains("foveated-chip")) {
+              name = `Foveated Suggestion [${currentHoveredElement.textContent.trim()}]`;
             } else if (currentHoveredElement.classList.contains("tab-btn")) {
               name = `Tab [${currentHoveredElement.textContent.trim()}]`;
             } else if (currentHoveredElement.classList.contains("layout-btn")) {
@@ -1968,6 +2068,13 @@
             updateTextDisplay();
             logTerminal(`Semantic Commit & Speak: "${val}"`, "evt");
             speakTypedText();
+
+            // Hide the foveated ribbon immediately on selection
+            const ribbon = document.getElementById("foveated-prediction-ribbon");
+            if (ribbon) {
+              ribbon.classList.remove("active");
+            }
+            activeFoveatedAnchor = null;
           }
         }
       }
@@ -2128,15 +2235,28 @@
       function displaySemanticSuggestions(suggestions) {
         for (let i = 0; i < 3; i++) {
           const chip = document.getElementById(`sem-${i}`);
-          if (chip) {
-            if (suggestions && suggestions[i]) {
+          const fovChip = document.getElementById(`fov-sem-${i}`);
+          if (suggestions && suggestions[i]) {
+            if (chip) {
               chip.textContent = suggestions[i];
               chip.setAttribute("data-value", suggestions[i]);
               chip.style.visibility = "visible";
-            } else {
+            }
+            if (fovChip) {
+              fovChip.textContent = suggestions[i];
+              fovChip.setAttribute("data-value", suggestions[i]);
+              fovChip.style.display = "flex";
+            }
+          } else {
+            if (chip) {
               chip.textContent = "---";
               chip.setAttribute("data-value", "");
               chip.style.visibility = "hidden";
+            }
+            if (fovChip) {
+              fovChip.textContent = "---";
+              fovChip.setAttribute("data-value", "");
+              fovChip.style.display = "none";
             }
           }
         }
@@ -2145,10 +2265,16 @@
       function clearSemanticSuggestions() {
         for (let i = 0; i < 3; i++) {
           const chip = document.getElementById(`sem-${i}`);
+          const fovChip = document.getElementById(`fov-sem-${i}`);
           if (chip) {
             chip.textContent = "---";
             chip.setAttribute("data-value", "");
             chip.style.visibility = "hidden";
+          }
+          if (fovChip) {
+            fovChip.textContent = "---";
+            fovChip.setAttribute("data-value", "");
+            fovChip.style.display = "none";
           }
         }
       }
